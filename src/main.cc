@@ -87,18 +87,18 @@ int main(int argc, char *argv[])
     }
 
     const auto config_json = read_json(config_path);
-    const auto options = PlannerOptions(config_json);
+    const auto opts = PlannerOptions(config_json);
 
-    std::cout << std::endl << "Loaded " << options.arm_dof << " dof arm..." << std::endl;
+    std::cout << std::endl << "Loaded " << opts.arm_dof << " dof arm..." << std::endl;
 
-    std::cout << "Start angles " << (options.planner_units == PlannerUnits::Degrees ? "(degrees): " : "(rads): ");
-    for (const auto &angle : options.arm_start_rads)
-        std::cout << (options.planner_units == PlannerUnits::Degrees ? angle * 180 / M_PI : angle) << " ";
+    std::cout << "Start angles " << (opts.planner_units == PlannerUnits::Degrees ? "(degrees): " : "(rads): ");
+    for (const auto &angle : opts.arm_start_rads)
+        std::cout << (opts.planner_units == PlannerUnits::Degrees ? angle * 180 / M_PI : angle) << " ";
     std::cout << std::endl;
 
-    std::cout << "End angles " << (options.planner_units == PlannerUnits::Degrees ? "(degrees): " : "(rads): ");
-    for (const auto &angle : options.arm_end_rads)
-        std::cout << (options.planner_units == PlannerUnits::Degrees ? angle * 180 / M_PI : angle) << " ";
+    std::cout << "End angles " << (opts.planner_units == PlannerUnits::Degrees ? "(degrees): " : "(rads): ");
+    for (const auto &angle : opts.arm_end_rads)
+        std::cout << (opts.planner_units == PlannerUnits::Degrees ? angle * 180 / M_PI : angle) << " ";
     std::cout << std::endl;
 
     // TODO: Check start and end have no collisions!
@@ -108,13 +108,13 @@ int main(int argc, char *argv[])
         // TODO: Draw start and end on top of image
 
         std::cout << std::endl << "Press any key to begin planning..." << std::endl << std::endl;
-        cv::imshow("Map", resize_image(map_image, options.image_display_scale));
+        cv::imshow("Map", resize_image(map_image, opts.image_display_scale));
         cv::waitKey(0);
     }
 
     // Choose planner
     Planner *planner;
-    switch (options.planner_type)
+    switch (opts.planner_type)
     {
         case PlannerType::RRT:
             std::cout << "RRT Planner" << std::endl;
