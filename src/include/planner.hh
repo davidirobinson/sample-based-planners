@@ -35,7 +35,7 @@ struct PlannerOptions
 
     explicit PlannerOptions(const Json::Value &json)
     {
-        std::string planner_type_str = json["general"]["planner_type"].asString();
+        std::string planner_type_str = json["general"]["planner"].asString();
         std::transform(planner_type_str.begin(), planner_type_str.end(), planner_type_str.begin(),
             [](unsigned char c){ return std::tolower(c); });
 
