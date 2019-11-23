@@ -5,10 +5,10 @@
 // Date: 2019-11-22
 //
 
-#include <planner.hh>
+#include <rrt_star.hh>
 
 
-int RRT_Star::plan(
+int RRTStar::plan(
         double*** plan_out,
         int* planlength,
         double* num_samples,

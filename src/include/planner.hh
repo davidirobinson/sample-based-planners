@@ -16,6 +16,7 @@
 #include <random>
 #include <ctime>
 #include <functional>
+#include <check_valid.hh>
 
 #include <json/json.h>
 
@@ -23,14 +24,14 @@
 enum class PlannerType
 {
     RRT,
-    RRT_CONNECT,
-    RRT_STAR,
+    RRTConnect,
+    RRTStar,
     PRM
 };
 
 struct PlannerOptions
 {
-    PlannerType planner_type = PlannerType::RRT;
+    PlannerType planner_type = PlannerType::RRTConnect;
 
     explicit PlannerOptions(const Json::Value &json)
     {
@@ -40,10 +41,10 @@ struct PlannerOptions
 
         if (planner_type_str == "rrt")
             planner_type = PlannerType::RRT;
-        else if (planner_type_str == "rrt_connect" || planner_type_str == "rrtconnect")
-            planner_type = PlannerType::RRT_CONNECT;
-        else if (planner_type_str == "rrt_star" || planner_type_str == "rrtstar")
-            planner_type = PlannerType::RRT_STAR;
+        else if (planner_type_str == "rrtconnect")
+            planner_type = PlannerType::RRTConnect;
+        else if (planner_type_str == "rrtstar")
+            planner_type = PlannerType::RRTStar;
         else if (planner_type_str == "prm")
             planner_type = PlannerType::PRM;
         else
@@ -172,60 +173,4 @@ class Planner
 			const tree &T,
 			const Config &config,
 			const double &radius);
-};
-
-class RRT : public Planner
-{
-	public:
-		int plan(
-			double*** plan_out,
-			int* planlength,
-			double* num_samples,
-			double* path_quality
-		);
-};
-
-class RRT_Connect : public Planner
-{
-	public:
-		int plan(
-			double*** plan_out,
-			int* planlength,
-			double* num_samples,
-			double* path_quality
-		);
-
-	private:
-		bool connect(tree &T, const Config &new_config);
-};
-
-class RRT_Star : public Planner
-{
-	public:
-		int plan(
-			double*** plan_out,
-			int* planlength,
-			double* num_samples,
-			double* path_quality
-		);
-	private:
-		const long timeout = 50000; // lower than the rest!
-		const double rewire_radius = 0.5;
-};
-
-class PRM : public Planner
-{
-	public:
-		int plan(
-			double*** plan_out,
-			int* planlength,
-			double* num_samples,
-			double* path_quality
-		);
-
-	private:
-		const double PRM_thresh = 1.5;
-		const int num_PRM_samples = 4000;
-
-		bool dijkstra(tree &T, Config start, Config goal);
 };

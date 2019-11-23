@@ -5,7 +5,7 @@
 // Date: 2019-11-22
 //
 
-#include <planner.hh>
+#include <rrt.hh>
 
 
 int RRT::plan(

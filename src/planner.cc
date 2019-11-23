@@ -160,8 +160,8 @@ bool Planner::no_collisions(Config start_config, Config goal_config)
             interp.angles[i] = (1-u)*start_config.angles[i] + (u)*goal_config.angles[i];
         }
 
-        // TODO: Implement this function
-        // if (!IsValidArmConfiguration(interp.angles, map, x_size, y_size)) return false;
+        if (!IsValidArmConfiguration(interp.angles, map, x_size, y_size))
+            return false;
     }
     return true;
 }

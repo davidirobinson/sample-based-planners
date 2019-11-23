@@ -10,6 +10,7 @@
 #include <math.h>
 #include <vector>
 
+
 typedef struct {
 	int X1, Y1;
 	int X2, Y2;

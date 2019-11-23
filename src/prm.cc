@@ -5,7 +5,7 @@
 // Date: 2019-11-22
 //
 
-#include <planner.hh>
+#include <prm.hh>
 
 
 bool PRM::dijkstra(tree &T, Config start, Config goal)
@@ -124,9 +124,7 @@ int PRM::plan(
         // Uniform random sampling
         Config alpha = sample_config(0);
 
-        // TODO: Implement
-        // if (IsValidArmConfiguration(alpha.angles, map, x_size, y_size))
-        if (true)
+        if (IsValidArmConfiguration(alpha.angles, map, x_size, y_size))
         {
             // Get neighbors
             auto Q = get_neighbors(PRM, alpha, PRM_thresh);

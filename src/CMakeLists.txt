@@ -16,4 +16,3 @@ target_include_directories(sample_based_planner PRIVATE
 
 target_link_libraries(sample_based_planner PRIVATE
     jsoncpp_lib)
-

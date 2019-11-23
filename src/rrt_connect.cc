@@ -1,14 +1,14 @@
 //
-// rrt_connect.cc
+// RRTConnect.cc
 //
 // Author: David Robinson
 // Date: 2019-11-22
 //
 
-#include <planner.hh>
+#include <rrt_connect.hh>
 
 
-bool RRT_Connect::connect(tree &T, const Config &new_config)
+bool RRTConnect::connect(tree &T, const Config &new_config)
 {
     Config nearest_config = get_nearest_neighbor(T, new_config);
     Config to_extend = nearest_config;
@@ -50,7 +50,7 @@ bool RRT_Connect::connect(tree &T, const Config &new_config)
 }
 
 
-int RRT_Connect::plan(
+int RRTConnect::plan(
         double*** plan_out,
         int* planlength,
         double* num_samples,

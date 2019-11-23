@@ -6,6 +6,10 @@
 //
 
 #include <planner.hh>
+#include <prm.hh>
+#include <rrt_connect.hh>
+#include <rrt_star.hh>
+#include <rrt.hh>
 
 #include <string>
 #include <iostream>
@@ -72,13 +76,13 @@ int main(int argc, char *argv[])
             std::cout << "RRT Planner" << std::endl;
             planner = new RRT;
             break;
-        case PlannerType::RRT_CONNECT:
+        case PlannerType::RRTConnect:
             std::cout << "RRT-Connect Planner" << std::endl;
-            planner = new RRT_Connect;
+            planner = new RRTConnect;
             break;
-        case PlannerType::RRT_STAR:
+        case PlannerType::RRTStar:
             std::cout << "RRT* Planner" << std::endl;
-            planner = new RRT_Star;
+            planner = new RRTStar;
             break;
         case PlannerType::PRM:
             std::cout << "PRM Planner" << std::endl;
