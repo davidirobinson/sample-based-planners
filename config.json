@@ -1,6 +1,15 @@
 {
     "general":
     {
-        "planner": "rrtconnect"
+        "planner": "rrtconnect",
+        "units": "degrees",
+        "arm_start":
+        [
+            90, 45, 90, 135, 90
+        ],
+        "arm_end":
+        [
+            90, 135, 180, 160, 270
+        ]
     }
 }

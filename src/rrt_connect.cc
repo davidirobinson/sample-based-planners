@@ -1,5 +1,5 @@
 //
-// RRTConnect.cc
+// rrt_connect.cc
 //
 // Author: David Robinson
 // Date: 2019-11-22

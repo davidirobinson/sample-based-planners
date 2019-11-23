@@ -1,5 +1,5 @@
 //
-// RRTConnect.hh
+// rrt_connect.hh
 //
 // Author: David Robinson
 // Date: 2019-11-22

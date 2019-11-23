@@ -29,16 +29,25 @@ enum class PlannerType
     PRM
 };
 
+enum class PlannerUnits
+{
+	Radians,
+	Degrees
+};
+
 struct PlannerOptions
 {
     PlannerType planner_type = PlannerType::RRTConnect;
+	PlannerUnits planner_units = PlannerUnits::Degrees;
+	std::vector<double> arm_start_rads;
+	std::vector<double> arm_end_rads;
+	size_t arm_dof;
 
     explicit PlannerOptions(const Json::Value &json)
     {
         std::string planner_type_str = json["general"]["planner"].asString();
         std::transform(planner_type_str.begin(), planner_type_str.end(), planner_type_str.begin(),
             [](unsigned char c){ return std::tolower(c); });
-
         if (planner_type_str == "rrt")
             planner_type = PlannerType::RRT;
         else if (planner_type_str == "rrtconnect")
@@ -49,6 +58,37 @@ struct PlannerOptions
             planner_type = PlannerType::PRM;
         else
             throw std::runtime_error(std::string("Unknown planner type: " + planner_type_str));
+
+		std::string planner_units_str = json["general"]["units"].asString();
+        std::transform(planner_units_str.begin(), planner_units_str.end(), planner_units_str.begin(),
+            [](unsigned char c){ return std::tolower(c); });
+        if (planner_units_str == "radians")
+            planner_units = PlannerUnits::Radians;
+        else if (planner_units_str == "degrees")
+            planner_units = PlannerUnits::Degrees;
+        else
+            throw std::runtime_error(std::string("Unknown planner units: " + planner_units_str));
+
+		for (const auto &angle_json : json["general"]["arm_start"])
+		{
+			const auto angle = planner_units == PlannerUnits::Degrees ?
+				angle_json.asDouble() / 180 * M_PI : angle_json.asDouble();
+			arm_start_rads.emplace_back(angle);
+		}
+
+		for (const auto &angle_json : json["general"]["arm_end"])
+		{
+			const auto angle = planner_units == PlannerUnits::Degrees ?
+				angle_json.asDouble() / 180 * M_PI : angle_json.asDouble();
+			arm_end_rads.emplace_back(angle);
+		}
+
+		if (arm_start_rads.size() != arm_end_rads.size())
+			throw std::runtime_error("Starting arm dofs does not match ending arm dofs");
+
+		arm_dof = arm_start_rads.size();
+		if (arm_dof < 2)
+			throw std::runtime_error("invalid dofs: " + std::to_string(arm_dof) + ", it should be at least 2");
     }
 };
 

@@ -1,5 +1,5 @@
 //
-// RRTStar.hh
+// rrt_star.hh
 //
 // Author: David Robinson
 // Date: 2019-11-22

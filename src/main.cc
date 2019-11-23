@@ -66,11 +66,29 @@ int main(int argc, char *argv[])
     }
 
     const auto config_json = read_json(config_path);
-    const auto planner_options = PlannerOptions(config_json);
+    const auto options = PlannerOptions(config_json);
+
+    std::cout << std::endl << "Loaded " << options.arm_dof << " dof arm..." << std::endl;
+
+    std::cout << "Start angles " << (options.planner_units == PlannerUnits::Degrees ? "(degrees): " : "(rads): ");
+    for (const auto &angle : options.arm_start_rads)
+        std::cout << (options.planner_units == PlannerUnits::Degrees ? angle * 180 / M_PI : angle) << " ";
+    std::cout << std::endl;
+
+    std::cout << "End angles " << (options.planner_units == PlannerUnits::Degrees ? "(degrees): " : "(rads): ");
+    for (const auto &angle : options.arm_end_rads)
+        std::cout << (options.planner_units == PlannerUnits::Degrees ? angle * 180 / M_PI : angle) << " ";
+    std::cout << std::endl;
+
+
+    // TODO: Load map as greyscale image
+    // const auto map_image = cv::imread()
+
+    // TODO: Check start and end have no collisions!
 
     // Choose planner
     Planner *planner;
-    switch (planner_options.planner_type)
+    switch (options.planner_type)
     {
         case PlannerType::RRT:
             std::cout << "RRT Planner" << std::endl;
@@ -92,7 +110,7 @@ int main(int argc, char *argv[])
             throw std::runtime_error("Unsupported planner type");
     }
 
-    // TODO: Compute plan
+    // TODO: Compute Plan
 
     // TODO: Playback finished plan
 
