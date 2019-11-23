@@ -17,11 +17,14 @@
 #include <unistd.h>
 
 #include <json/json.h>
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui.hpp>
 
 
 void print_usage(char **argv)
 {
-    std::cerr << "USAGE: " << argv[0] << " -c <path-to-config> -m <path-to-map>" << std::endl;
+    std::cerr << "USAGE: " << argv[0]
+              << " -c <path-to-config> -m <path-to-map> -v <visualize-flag>" << std::endl;
 }
 
 Json::Value read_json(const std::string &path)
@@ -35,13 +38,21 @@ Json::Value read_json(const std::string &path)
     return root;
 }
 
+cv::Mat resize_image(const cv::Mat &input, const double sf)
+{
+    cv::Mat output;
+    cv::resize(input, output, cv::Size(), sf, sf, cv::INTER_NEAREST);
+    return output;
+}
+
 int main(int argc, char *argv[])
 {
     std::string config_path;
     std::string map_path;
+    bool visualize = false;
 
     int option = -1;
-    while ((option = getopt(argc, argv, "c:m:h")) != -1)
+    while ((option = getopt(argc, argv, "c:m:vh")) != -1)
     {
         switch (option)
         {
@@ -54,6 +65,8 @@ int main(int argc, char *argv[])
             case 'h':
                 print_usage(argv);
                 std::exit(EXIT_FAILURE);
+            case 'v':
+                visualize = true;
             default:
                 break;
         }
@@ -61,6 +74,14 @@ int main(int argc, char *argv[])
 
     if (config_path.empty() || map_path.empty())
     {
+        print_usage(argv);
+        std::exit(EXIT_FAILURE);
+    }
+
+    const auto map_image = cv::imread(map_path, cv::IMREAD_GRAYSCALE);
+    if(!map_image.data)
+    {
+        std::cout << "Could not open or find the map_image" << std::endl;
         print_usage(argv);
         std::exit(EXIT_FAILURE);
     }
@@ -80,11 +101,16 @@ int main(int argc, char *argv[])
         std::cout << (options.planner_units == PlannerUnits::Degrees ? angle * 180 / M_PI : angle) << " ";
     std::cout << std::endl;
 
-
-    // TODO: Load map as greyscale image
-    // const auto map_image = cv::imread()
-
     // TODO: Check start and end have no collisions!
+
+    if (visualize)
+    {
+        // TODO: Draw start and end on top of image
+
+        std::cout << std::endl << "Press any key to begin planning..." << std::endl << std::endl;
+        cv::imshow("Map", resize_image(map_image, options.image_display_scale));
+        cv::waitKey(0);
+    }
 
     // Choose planner
     Planner *planner;
