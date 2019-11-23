@@ -19,9 +19,9 @@
 #include <json/json.h>
 
 
-void print_usage()
+void print_usage(char **argv)
 {
-    std::cerr << "USAGE: ./main -c <path-to-config> -m <path-to-map>" << std::endl;
+    std::cerr << "USAGE: " << argv[0] << " -c <path-to-config> -m <path-to-map>" << std::endl;
 }
 
 Json::Value read_json(const std::string &path)
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
                 map_path = std::string(optarg);
                 break;
             case 'h':
-                print_usage();
+                print_usage(argv);
                 std::exit(EXIT_FAILURE);
             default:
                 break;
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 
     if (config_path.empty() || map_path.empty())
     {
-        print_usage();
+        print_usage(argv);
         std::exit(EXIT_FAILURE);
     }
 
