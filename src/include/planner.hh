@@ -86,7 +86,6 @@ bool operator==(const Config &a, const Config &b);
 class Planner
 {
 	public:
-
 		Planner() {}
 		~Planner() {}
 
@@ -116,12 +115,9 @@ class Planner
 			double*** plan_out,
 			int* planlength,
 			double* num_samples,
-			double* path_quality
-		)
-		{ return 0; }
+			double* path_quality) = 0;
 
 	protected:
-
 		typedef std::unordered_map<int, Config> tree;
 
 		/*

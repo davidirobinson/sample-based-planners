@@ -7,6 +7,7 @@
 
 #include <planner.hh>
 
+
 bool operator==(const Config &a, const Config &b)
 {
 	if (a.angles.size() != b.angles.size()) return false;
