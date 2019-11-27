@@ -25,11 +25,11 @@ int RRT::plan(
     int count(0);
     while (true)
     {
-        Config extended_config;
+        ArmConfiguration extended_config;
         if (generate_RRT_tree(T_start, goal_config, extended_config))
         {
             // Check the distance to the goal as a status update
-            Config nearest_to_goal = get_nearest_neighbor(T_start, goal_config);
+            ArmConfiguration nearest_to_goal = get_nearest_neighbor(T_start, goal_config);
             goal_dist = config_dist(nearest_to_goal, goal_config);
 
             if (goal_dist < angle_step_size)
@@ -54,7 +54,7 @@ int RRT::plan(
 
     /************* Return Path *************/
 
-    std::vector<Config> plan;
+    std::vector<ArmConfiguration> plan;
     generate_path(plan, T_start, goal_config);
     std::reverse(plan.begin(), plan.end());
 

@@ -8,9 +8,9 @@
 #include <prm.hh>
 
 
-bool PRM::dijkstra(tree &T, Config start, Config goal)
+bool PRM::dijkstra(tree &T, ArmConfiguration start, ArmConfiguration goal)
 {
-    std::vector<Config> plan;
+    std::vector<ArmConfiguration> plan;
 
     /*
     * Setup Data Structures for Search
@@ -31,7 +31,7 @@ bool PRM::dijkstra(tree &T, Config start, Config goal)
     while(!open_set.empty() && count < timeout)
     {
         /*
-        * Get Config with lowest f value
+        * Get ArmConfiguration with lowest f value
         */
         float min_f = 1e99;
         int min_idx = 0;
@@ -116,13 +116,13 @@ int PRM::plan(
     /************* Generate PRM *************/
 
     tree PRM;
-    Config PRM_start_config, PRM_goal_config;
+    ArmConfiguration PRM_start_config, PRM_goal_config;
     bool valid_start_goal_connections = false;
     int PRM_samples(0);
     while (true)
     {
         // Uniform random sampling
-        Config alpha = sample_config(0);
+        ArmConfiguration alpha = sample_config(0);
 
         if (IsValidArmConfiguration(alpha.angles, map, x_size, y_size))
         {
@@ -172,7 +172,7 @@ int PRM::plan(
 
     /************* Compute Path *************/
 
-    std::vector<Config> plan;
+    std::vector<ArmConfiguration> plan;
     if (!dijkstra(PRM, PRM_start_config, PRM_goal_config))
     {
         std::cout << "Invalid Graph" << std::endl;

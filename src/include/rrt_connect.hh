@@ -28,5 +28,5 @@ class RRTConnect : public Planner
 		);
 
 	private:
-		bool connect(tree &T, const Config &new_config);
+		bool connect(tree &T, const ArmConfiguration &new_config);
 };

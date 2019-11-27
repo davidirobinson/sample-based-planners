@@ -45,6 +45,32 @@ cv::Mat resize_image(const cv::Mat &input, const double sf)
     return output;
 }
 
+cv::Mat draw_configs(cv::Mat map_image, const std::vector<ArmConfiguration> &configs, const double scale)
+{
+    map_image = resize_image(map_image, scale);
+    cv::Mat color_map_image;
+    cv::cvtColor(map_image, color_map_image, CV_GRAY2RGB);
+
+    std::cout << map_image.type() << std::endl;
+    std::cout << color_map_image.type() << std::endl;
+
+    for (const auto &config : configs)
+    {
+        cv::Point2d current(0.0, 0.0);
+        cv::circle(color_map_image, current, scale * 0.5, cv::Scalar(0, 0, 255), CV_FILLED);
+
+        for (size_t i = 0; i < config.angles.size(); ++i)
+        {
+            cv::Point2d next(current.x + LINKLENGTH_CELLS * scale * cos(config.angles.at(i)),
+                             current.y + LINKLENGTH_CELLS * scale * sin(config.angles.at(i)));
+            cv::line(color_map_image, current, next, cv::Scalar(0, 0, 255), scale * 0.2);
+            cv::circle(color_map_image, next, scale * 0.5, cv::Scalar(0, 0, 255), CV_FILLED);
+            current = next;
+        }
+    }
+    return color_map_image;
+}
+
 int main(int argc, char *argv[])
 {
     std::string config_path;
@@ -79,7 +105,10 @@ int main(int argc, char *argv[])
     }
 
     const auto map_image = cv::imread(map_path, cv::IMREAD_GRAYSCALE);
-    if(!map_image.data)
+
+    std::cout << map_image.type() << std::endl;
+
+    if (!map_image.data)
     {
         std::cout << "Could not open or find the map_image" << std::endl;
         print_usage(argv);
@@ -90,25 +119,17 @@ int main(int argc, char *argv[])
     const auto opts = PlannerOptions(config_json);
 
     std::cout << std::endl << "Loaded " << opts.arm_dof << " dof arm..." << std::endl;
-
-    std::cout << "Start angles " << (opts.planner_units == PlannerUnits::Degrees ? "(degrees): " : "(rads): ");
-    for (const auto &angle : opts.arm_start_rads)
-        std::cout << (opts.planner_units == PlannerUnits::Degrees ? angle * 180 / M_PI : angle) << " ";
-    std::cout << std::endl;
-
-    std::cout << "End angles " << (opts.planner_units == PlannerUnits::Degrees ? "(degrees): " : "(rads): ");
-    for (const auto &angle : opts.arm_end_rads)
-        std::cout << (opts.planner_units == PlannerUnits::Degrees ? angle * 180 / M_PI : angle) << " ";
-    std::cout << std::endl;
+    std::cout << "Start angles (degrees): " << opts.arm_start_rads << std::endl;
+    std::cout << "End angles (degrees): " << opts.arm_end_rads << std::endl;
 
     // TODO: Check start and end have no collisions!
 
     if (visualize)
     {
-        // TODO: Draw start and end on top of image
+        const auto configs = std::vector<ArmConfiguration>{ opts.arm_start_rads, opts.arm_end_rads };
+        cv::imshow("Map", draw_configs(map_image, configs, opts.image_display_scale));
 
         std::cout << std::endl << "Press any key to begin planning..." << std::endl << std::endl;
-        cv::imshow("Map", resize_image(map_image, opts.image_display_scale));
         cv::waitKey(0);
     }
 

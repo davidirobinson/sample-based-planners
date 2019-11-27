@@ -8,17 +8,17 @@
 #include <rrt_connect.hh>
 
 
-bool RRTConnect::connect(tree &T, const Config &new_config)
+bool RRTConnect::connect(tree &T, const ArmConfiguration &new_config)
 {
-    Config nearest_config = get_nearest_neighbor(T, new_config);
-    Config to_extend = nearest_config;
+    ArmConfiguration nearest_config = get_nearest_neighbor(T, new_config);
+    ArmConfiguration to_extend = nearest_config;
 
-    std::vector<Config> extentions;
+    std::vector<ArmConfiguration> extentions;
 
     int count(0);
     while (count < timeout)
     {
-        Config extended_config = extend(to_extend, new_config);
+        ArmConfiguration extended_config = extend(to_extend, new_config);
 
         if (no_collisions(extended_config, nearest_config))
         {
@@ -63,7 +63,7 @@ int RRTConnect::plan(
     T_start[start_config.id] = start_config;
     T_goal[goal_config.id] = goal_config;
 
-    Config T_start_end, T_goal_end, extended_config;
+    ArmConfiguration T_start_end, T_goal_end, extended_config;
 
     bool T_switch(true);
     int count(0);
@@ -95,7 +95,7 @@ int RRTConnect::plan(
 
     /************* Return Path *************/
 
-    std::vector<Config> plan;
+    std::vector<ArmConfiguration> plan;
 
     // Go from meeting point toward the start and reverse
     generate_path(plan, T_start, get_nearest_neighbor(T_start, extended_config));
