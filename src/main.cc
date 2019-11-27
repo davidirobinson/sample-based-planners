@@ -38,37 +38,31 @@ Json::Value read_json(const std::string &path)
     return root;
 }
 
-cv::Mat resize_image(const cv::Mat &input, const double sf)
+cv::Point2d map_to_image(const cv::Mat &image, const cv::Point2d &coord)
 {
-    cv::Mat output;
-    cv::resize(input, output, cv::Size(), sf, sf, cv::INTER_NEAREST);
-    return output;
+    return cv::Point2d(coord.x, image.rows - coord.y);
 }
 
-cv::Mat draw_configs(cv::Mat map_image, const std::vector<ArmConfiguration> &configs, const double scale)
+cv::Mat draw_configs(cv::Mat map_image, const std::vector<ArmConfiguration> &configs, const double arm_link_length, const double scale)
 {
-    map_image = resize_image(map_image, scale);
-    cv::Mat color_map_image;
-    cv::cvtColor(map_image, color_map_image, CV_GRAY2RGB);
-
-    std::cout << map_image.type() << std::endl;
-    std::cout << color_map_image.type() << std::endl;
+    cv::resize(map_image, map_image, cv::Size(), scale, scale, cv::INTER_NEAREST);
+    cv::cvtColor(map_image, map_image, CV_GRAY2RGB);
 
     for (const auto &config : configs)
     {
         cv::Point2d current(0.0, 0.0);
-        cv::circle(color_map_image, current, scale * 0.5, cv::Scalar(0, 0, 255), CV_FILLED);
+        cv::circle(map_image, map_to_image(map_image, current), scale * 0.5, cv::Scalar(0, 0, 255), CV_FILLED);
 
         for (size_t i = 0; i < config.angles.size(); ++i)
         {
-            cv::Point2d next(current.x + LINKLENGTH_CELLS * scale * cos(config.angles.at(i)),
-                             current.y + LINKLENGTH_CELLS * scale * sin(config.angles.at(i)));
-            cv::line(color_map_image, current, next, cv::Scalar(0, 0, 255), scale * 0.2);
-            cv::circle(color_map_image, next, scale * 0.5, cv::Scalar(0, 0, 255), CV_FILLED);
+            cv::Point2d next(current.x + arm_link_length * scale * cos(config.angles.at(i)),
+                             current.y + arm_link_length * scale * sin(config.angles.at(i)));
+            cv::line(map_image, map_to_image(map_image, current), map_to_image(map_image, next), cv::Scalar(0, 0, 255), scale * 0.3);
+            cv::circle(map_image, map_to_image(map_image, next), scale * 0.6, cv::Scalar(0, 0, 255), CV_FILLED);
             current = next;
         }
     }
-    return color_map_image;
+    return map_image;
 }
 
 int main(int argc, char *argv[])
@@ -127,7 +121,7 @@ int main(int argc, char *argv[])
     if (visualize)
     {
         const auto configs = std::vector<ArmConfiguration>{ opts.arm_start_rads, opts.arm_end_rads };
-        cv::imshow("Map", draw_configs(map_image, configs, opts.image_display_scale));
+        cv::imshow("Map", draw_configs(map_image, configs, opts.arm_link_length, opts.image_display_scale));
 
         std::cout << std::endl << "Press any key to begin planning..." << std::endl << std::endl;
         cv::waitKey(0);

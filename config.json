@@ -5,12 +5,13 @@
         "units": "degrees",
         "arm_start":
         [
-            90, 45, 90, 135, 90
+            0, 45, 0, -45, 0
         ],
         "arm_end":
         [
-            90, 135, 180, 160, 270
+            45, 45, 90, 90, 135
         ],
+        "arm_link_length": 10,
         "image_display_scale": 10.0
     }
 }

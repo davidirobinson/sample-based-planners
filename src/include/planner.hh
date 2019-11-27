@@ -66,6 +66,7 @@ struct PlannerOptions
 	ArmConfiguration arm_start_rads;
 	ArmConfiguration arm_end_rads;
 	size_t arm_dof;
+	double arm_link_length;
 	double image_display_scale = 5.0;
 
     explicit PlannerOptions(const Json::Value &json)
@@ -115,6 +116,7 @@ struct PlannerOptions
 		if (arm_dof < 2)
 			throw std::runtime_error("invalid dofs: " + std::to_string(arm_dof) + ", it should be at least 2");
 
+		arm_link_length = json["general"]["arm_link_length"].asDouble();
 		image_display_scale = json["general"]["image_display_scale"].asDouble();
     }
 };
