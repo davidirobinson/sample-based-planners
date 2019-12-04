@@ -18,8 +18,21 @@
 #include <functional>
 #include <check_valid.hh>
 
+#include <opencv2/opencv.hpp>
 #include <json/json.h>
 
+
+enum class MapState
+{
+	Occupied,
+	Free
+};
+
+struct Map
+{
+	cv::Mat image;
+	std::unordered_map<size_t, std::unordered_map<size_t, MapState>> data;
+};
 
 enum class PlannerType
 {

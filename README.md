@@ -20,9 +20,7 @@ libjsoncpp & OpenCV >= 3.0
 
 ## TODO
 
-- Create visualizer for arm
 - Check for collision in start and goal config
-- Load map into a sparse representation
 - Execute plan & verify success
 - Animate arm trajectory for successful plan
 - Update Docs

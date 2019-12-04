@@ -24,7 +24,7 @@
 void print_usage(char **argv)
 {
     std::cerr << "USAGE: " << argv[0]
-              << " -c <path-to-config> -m <path-to-map> -v <visualize-flag>" << std::endl;
+              << " -c <path-to-config> -m <path-to-map> [-v (visualize)]" << std::endl;
 }
 
 Json::Value read_json(const std::string &path)
@@ -38,9 +38,38 @@ Json::Value read_json(const std::string &path)
     return root;
 }
 
-cv::Point2d map_to_image(const cv::Mat &image, const cv::Point2d &coord)
+cv::Point2d swap_coords(const cv::Mat &image, const cv::Point2d &coord)
 {
-    return cv::Point2d(coord.x, image.rows - coord.y);
+    return cv::Point2d(coord.x, image.rows - coord.y - 1);
+}
+
+Map load_map(const std::string &map_path)
+{
+    const auto image = cv::imread(map_path, cv::IMREAD_GRAYSCALE);
+    if (!image.data)
+    {
+        std::cout << "Could not open or find the map_image" << std::endl;
+        std::exit(EXIT_FAILURE);
+    }
+    cv::Mat image_uchar;
+    image.convertTo(image_uchar, CV_8U);
+
+    std::unordered_map<size_t, std::unordered_map<size_t, MapState>> data;
+    for (size_t row = 0; row < image_uchar.rows; row++)
+    {
+        for (size_t col = 0; col < image_uchar.cols; col++)
+        {
+            const auto px = static_cast<unsigned>(image_uchar.at<uchar>(row, col));
+            const auto map_coords = swap_coords(image_uchar, cv::Point2d(col, row));
+
+            if (px > 0)
+                data[map_coords.x][map_coords.y] = MapState::Free;
+            else
+                data[map_coords.x][map_coords.y] = MapState::Occupied;
+        }
+    }
+
+    return Map{ image_uchar, data };
 }
 
 cv::Mat draw_configs(cv::Mat map_image, const std::vector<ArmConfiguration> &configs, const double arm_link_length, const double scale)
@@ -51,14 +80,14 @@ cv::Mat draw_configs(cv::Mat map_image, const std::vector<ArmConfiguration> &con
     for (const auto &config : configs)
     {
         cv::Point2d current(0.0, 0.0);
-        cv::circle(map_image, map_to_image(map_image, current), scale * 0.5, cv::Scalar(0, 0, 255), CV_FILLED);
+        cv::circle(map_image, swap_coords(map_image, current), scale * 0.5, cv::Scalar(0, 0, 255), CV_FILLED);
 
         for (size_t i = 0; i < config.angles.size(); ++i)
         {
             cv::Point2d next(current.x + arm_link_length * scale * cos(config.angles.at(i)),
                              current.y + arm_link_length * scale * sin(config.angles.at(i)));
-            cv::line(map_image, map_to_image(map_image, current), map_to_image(map_image, next), cv::Scalar(0, 0, 255), scale * 0.3);
-            cv::circle(map_image, map_to_image(map_image, next), scale * 0.6, cv::Scalar(0, 0, 255), CV_FILLED);
+            cv::line(map_image, swap_coords(map_image, current), swap_coords(map_image, next), cv::Scalar(0, 0, 255), scale * 0.3);
+            cv::circle(map_image, swap_coords(map_image, next), scale * 0.6, cv::Scalar(0, 0, 255), CV_FILLED);
             current = next;
         }
     }
@@ -98,21 +127,12 @@ int main(int argc, char *argv[])
         std::exit(EXIT_FAILURE);
     }
 
-    const auto map_image = cv::imread(map_path, cv::IMREAD_GRAYSCALE);
-
-    std::cout << map_image.type() << std::endl;
-
-    if (!map_image.data)
-    {
-        std::cout << "Could not open or find the map_image" << std::endl;
-        print_usage(argv);
-        std::exit(EXIT_FAILURE);
-    }
-
+    const auto map = load_map(map_path);
     const auto config_json = read_json(config_path);
     const auto opts = PlannerOptions(config_json);
 
-    std::cout << std::endl << "Loaded " << opts.arm_dof << " dof arm..." << std::endl;
+    std::cout << std::endl << "Loaded " << map.data.size() << " x " << map.data.at(0).size() << " map." << std::endl;
+    std::cout << std::endl << "Loaded " << opts.arm_dof << " dof arm." << std::endl;
     std::cout << "Start angles (degrees): " << opts.arm_start_rads << std::endl;
     std::cout << "End angles (degrees): " << opts.arm_end_rads << std::endl;
 
@@ -121,7 +141,7 @@ int main(int argc, char *argv[])
     if (visualize)
     {
         const auto configs = std::vector<ArmConfiguration>{ opts.arm_start_rads, opts.arm_end_rads };
-        cv::imshow("Map", draw_configs(map_image, configs, opts.arm_link_length, opts.image_display_scale));
+        cv::imshow("Map", draw_configs(map.image, configs, opts.arm_link_length, opts.image_display_scale));
 
         std::cout << std::endl << "Press any key to begin planning..." << std::endl << std::endl;
         cv::waitKey(0);
@@ -133,6 +153,7 @@ int main(int argc, char *argv[])
     {
         case PlannerType::RRT:
             std::cout << "RRT Planner" << std::endl;
+            // TODO: Use modern ptrs
             planner = new RRT;
             break;
         case PlannerType::RRTConnect:
