@@ -20,7 +20,6 @@ libjsoncpp & OpenCV >= 3.0
 
 ## TODO
 
-- Check for collision in start and goal config
 - Execute plan & verify success
 - Animate arm trajectory for successful plan
 - Update Docs

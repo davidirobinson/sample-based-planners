@@ -16,71 +16,27 @@
 #include <random>
 #include <ctime>
 #include <functional>
+
+#include <types.hh>
 #include <check_valid.hh>
 
 #include <opencv2/opencv.hpp>
 #include <json/json.h>
 
 
-enum class MapState
-{
-	Occupied,
-	Free
-};
-
-struct Map
-{
-	cv::Mat image;
-	std::unordered_map<size_t, std::unordered_map<size_t, MapState>> data;
-};
-
-enum class PlannerType
-{
-    RRT,
-    RRTConnect,
-    RRTStar,
-    PRM
-};
-
-enum class PlannerUnits
-{
-	Radians,
-	Degrees
-};
-
-struct ArmConfiguration
-{
-	int id;
-	int parent_id;
-	std::vector<double> angles;
-
-	// For PRM:
-	double cost;
-	std::vector<int> edges;
-
-	ArmConfiguration()
-	{
-		id = 0;
-		parent_id = -1;
-	}
-
-	ArmConfiguration(std::vector<double> _angles) :
-		angles(_angles)
-	{
-		id = 0;
-		parent_id = -1;
-	}
-};
-
 struct PlannerOptions
 {
     PlannerType planner_type = PlannerType::RRTConnect;
 	PlannerUnits planner_units = PlannerUnits::Degrees;
-	ArmConfiguration arm_start_rads;
-	ArmConfiguration arm_end_rads;
+	ArmConfiguration start_config;
+	ArmConfiguration goal_config;
 	size_t arm_dof;
 	double arm_link_length;
 	double image_display_scale = 5.0;
+
+	PlannerOptions()
+	{
+	}
 
     explicit PlannerOptions(const Json::Value &json)
     {
@@ -112,20 +68,20 @@ struct PlannerOptions
 		{
 			const auto angle = planner_units == PlannerUnits::Degrees ?
 				angle_json.asDouble() / 180 * M_PI : angle_json.asDouble();
-			arm_start_rads.angles.emplace_back(angle);
+			start_config.angles.emplace_back(angle);
 		}
 
 		for (const auto &angle_json : json["general"]["arm_end"])
 		{
 			const auto angle = planner_units == PlannerUnits::Degrees ?
 				angle_json.asDouble() / 180 * M_PI : angle_json.asDouble();
-			arm_end_rads.angles.emplace_back(angle);
+			goal_config.angles.emplace_back(angle);
 		}
 
-		if (arm_start_rads.angles.size() != arm_end_rads.angles.size())
+		if (start_config.angles.size() != goal_config.angles.size())
 			throw std::runtime_error("Starting arm dofs does not match ending arm dofs");
 
-		arm_dof = arm_start_rads.angles.size();
+		arm_dof = start_config.angles.size();
 		if (arm_dof < 2)
 			throw std::runtime_error("invalid dofs: " + std::to_string(arm_dof) + ", it should be at least 2");
 
@@ -134,44 +90,13 @@ struct PlannerOptions
     }
 };
 
-std::ostream &operator<<(std::ostream &stream, const ArmConfiguration &arm_config);
-
-bool operator==(const ArmConfiguration &a, const ArmConfiguration &b);
-
-using tree = std::unordered_map<size_t, ArmConfiguration>;
-
 /*
  * Base Class for Planners
  */
 class Planner
 {
 	public:
-		Planner()
-		{
-		}
-
-		void set_values(
-			double*	_map,
-			int _x_size,
-			int _y_size,
-			ArmConfiguration _start_config,
-			ArmConfiguration _goal_config,
-			size_t _numofDOFs)
-		{
-			// TODO: move to ctor
-			// Save values
-			map = _map;
-			x_size = _x_size;
-			y_size = _y_size;
-			numofDOFs = _numofDOFs;
-
-			// Get start / end configs
-			start_config = _start_config;
-			goal_config = _goal_config;
-
-			// Intialize Random
-			random = std::default_random_engine(rd());
-		}
+		Planner(const PlannerOptions &opts, const Map &map);
 
 		virtual int plan(
 			double*** plan_out,
@@ -209,16 +134,11 @@ class Planner
 			const ArmConfiguration &config,
 			const double &radius);
 
-		double*	map;
-		size_t x_size;
-		size_t y_size;
-		size_t numofDOFs;
-
-		ArmConfiguration start_config;
-		ArmConfiguration goal_config;
+		const PlannerOptions opts_;
+		const Map map_;
 
 		std::random_device rd;
-		std::default_random_engine random;
+		std::default_random_engine random_;
 
 		/*
 		 * Params

@@ -8,23 +8,11 @@
 #include <planner.hh>
 
 
-std::ostream &operator<<(std::ostream &stream, const ArmConfiguration &arm_config)
+Planner::Planner(const PlannerOptions &opts, const Map &map) :
+    opts_(opts),
+    map_(map),
+    random_(std::default_random_engine(rd()))
 {
-    for (const auto &angle : arm_config.angles)
-        stream << angle * 180 / M_PI << " ";
-    return stream;
-}
-
-bool operator==(const ArmConfiguration &a, const ArmConfiguration &b)
-{
-	if (a.angles.size() != b.angles.size()) return false;
-
-	for (int i=0; i<a.angles.size(); i++)
-	{
-		double dist = fabs(a.angles[i] - b.angles[i]);
-		if (dist > 0.001) return false;
-	}
-	return true;
 }
 
 double Planner::config_dist(const ArmConfiguration &a, const ArmConfiguration &b)
@@ -75,22 +63,16 @@ ArmConfiguration Planner::sample_config(const double &p_goal)
     std::uniform_real_distribution<double> probability(0,1);
     std::uniform_real_distribution<double> angle(0,2*M_PI);
 
-    if (probability(random) < p_goal)
-    {
-        return goal_config;
-    }
-    else
-    {
-        ArmConfiguration random_config;
-        random_config.angles.resize(goal_config.angles.size());
+    if (probability(random_) < p_goal)
+        return opts_.goal_config;
 
-        for (int i=0; i<goal_config.angles.size(); i++)
-        {
-            random_config.angles[i] = angle(random);
-        }
+    ArmConfiguration random_config;
+    random_config.angles.resize(opts_.goal_config.angles.size());
 
-        return random_config;
-    }
+    for (int i = 0; i < opts_.goal_config.angles.size(); i++)
+        random_config.angles[i] = angle(random_);
+
+    return random_config;
 }
 
 ArmConfiguration Planner::get_nearest_neighbor(
@@ -147,7 +129,7 @@ bool Planner::no_collisions(ArmConfiguration start_config, ArmConfiguration goal
             interp.angles[i] = (1-u)*start_config.angles[i] + (u)*goal_config.angles[i];
         }
 
-        if (!IsValidArmConfiguration(interp.angles, map, x_size, y_size))
+        if (!IsValidArmConfiguration(interp, map_))
             return false;
     }
     return true;

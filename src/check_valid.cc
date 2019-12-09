@@ -8,11 +8,6 @@
 #include <check_valid.hh>
 
 
-inline int get_map_index(int x, int y, int x_size, int y_size)
-{
-    return (y*x_size + x);
-}
-
 void ContXY2Cell(double x, double y, short unsigned int* pX, short unsigned int *pY, int x_size, int y_size)
 {
 	double cellsize = 1.0;
@@ -119,65 +114,56 @@ int get_next_point(bresenham_param_t *params)
 	return 1;
 }
 
-int IsValidLineSegment(double x0, double y0, double x1, double y1, double* map, int x_size, int y_size)
+int IsValidLineSegment(double x0, double y0, double x1, double y1, const Map &map)
 {
 	bresenham_param_t params;
 	int nX, nY;
     short unsigned int nX0, nY0, nX1, nY1;
 
-    //printf("checking link <%f %f> to <%f %f>\n", x0,y0,x1,y1);
-
-	//make sure the line segment is inside the environment
-	if(x0 < 0 || x0 >= x_size ||
-	   x1 < 0 || x1 >= x_size ||
-	   y0 < 0 || y0 >= y_size ||
-	   y1 < 0 || y1 >= y_size)
+	// Make sure the line segment is inside the map
+	if(x0 < 0 || x0 >= map.size_x ||
+	   x1 < 0 || x1 >= map.size_x ||
+	   y0 < 0 || y0 >= map.size_y ||
+	   y1 < 0 || y1 >= map.size_y)
 	{
 		return 0;
 	}
 
-	ContXY2Cell(x0, y0, &nX0, &nY0, x_size, y_size);
-	ContXY2Cell(x1, y1, &nX1, &nY1, x_size, y_size);
+	ContXY2Cell(x0, y0, &nX0, &nY0, map.size_x, map.size_y);
+	ContXY2Cell(x1, y1, &nX1, &nY1, map.size_x, map.size_y);
 
-    //printf("checking link <%d %d> to <%d %d>\n", nX0,nY0,nX1,nY1);
-
-	//iterate through the points on the segment
+	// Iterate through the points on the segment
 	get_bresenham_parameters(nX0, nY0, nX1, nY1, &params);
 	do
 	{
 		get_current_point(&params, &nX, &nY);
-		if(map[get_map_index(nX,nY,x_size,y_size)] == 1)
-        {
+		if (map.data.at(nX).at(nY) == MapState::Occupied)
 		    return 0;
-		}
 	}
 	while (get_next_point(&params));
 
 	return 1;
 }
 
-
-bool IsValidArmConfiguration(std::vector<double> angles, double* map, int x_size, int y_size)
+bool IsValidArmConfiguration(const ArmConfiguration &config, const Map &map)
 {
-    double x0,y0,x1,y1;
-    int i;
+ 	// Iterate through all the links starting with the base
+    double x0, y0, x1, y1;
+	x1 = y1 = 0;
 
- 	//iterate through all the links starting with the base
-	x1 = ((double)x_size)/2.0;
-    y1 = 0;
-	for(i = 0; i < angles.size(); i++)
+	for (const auto &angle : config.angles)
 	{
-		//compute the corresponding line segment
+		// Compute the corresponding line segment
 		x0 = x1;
 		y0 = y1;
-		x1 = x0 + LINKLENGTH_CELLS*cos(2*M_PI-angles[i]);
-		y1 = y0 - LINKLENGTH_CELLS*sin(2*M_PI-angles[i]);
+		x1 = x0 + LINKLENGTH_CELLS * cos(angle);
+		y1 = y0 + LINKLENGTH_CELLS * sin(angle);
 
-		//check the validity of the corresponding line segment
-		if(!IsValidLineSegment(x0,y0,x1,y1,map,x_size,y_size))
-		{
+		std::cout << "checking " << x0 << "," << y0 << " to " << x1 << "," << y1 << std::endl;
+
+		// Check the validity of the corresponding line segment
+		if (!IsValidLineSegment(x0, y0, x1, y1, map))
 			return false;
-		}
 	}
 	return true;
 }

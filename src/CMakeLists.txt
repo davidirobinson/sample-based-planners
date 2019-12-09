@@ -5,12 +5,13 @@ find_package(jsoncpp REQUIRED)
 
 add_executable(sample_based_planner
     main.cc
-    planner.cc
     check_valid.cc
-    rrt.cc
-    rrt_connect.cc
-    rrt_star.cc
-    prm.cc)
+    planner.cc
+    # rrt.cc
+    # rrt_connect.cc
+    # rrt_star.cc
+    # prm.cc
+    )
 
 target_include_directories(sample_based_planner PRIVATE
     include

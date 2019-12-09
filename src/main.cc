@@ -6,10 +6,13 @@
 //
 
 #include <planner.hh>
-#include <prm.hh>
-#include <rrt_connect.hh>
-#include <rrt_star.hh>
-#include <rrt.hh>
+// #include <prm.hh>
+// #include <rrt_connect.hh>
+// #include <rrt_star.hh>
+// #include <rrt.hh>
+
+#include <types.hh>
+#include <check_valid.hh>
 
 #include <string>
 #include <iostream>
@@ -69,7 +72,7 @@ Map load_map(const std::string &map_path)
         }
     }
 
-    return Map{ image_uchar, data };
+    return Map{ image_uchar, static_cast<size_t>(image_uchar.cols), static_cast<size_t>(image_uchar.rows), data };
 }
 
 cv::Mat draw_configs(cv::Mat map_image, const std::vector<ArmConfiguration> &configs, const double arm_link_length, const double scale)
@@ -131,46 +134,56 @@ int main(int argc, char *argv[])
     const auto config_json = read_json(config_path);
     const auto opts = PlannerOptions(config_json);
 
-    std::cout << std::endl << "Loaded " << map.data.size() << " x " << map.data.at(0).size() << " map." << std::endl;
-    std::cout << std::endl << "Loaded " << opts.arm_dof << " dof arm." << std::endl;
-    std::cout << "Start angles (degrees): " << opts.arm_start_rads << std::endl;
-    std::cout << "End angles (degrees): " << opts.arm_end_rads << std::endl;
+    std::cout << "Loaded " << map.data.size() << " x " << map.data.at(0).size() << " map." << std::endl;
+    std::cout << "Loaded " << opts.arm_dof << " dof arm." << std::endl;
+    std::cout << "Start angles (degrees): " << opts.start_config << std::endl;
+    std::cout << "End angles (degrees): " << opts.goal_config << std::endl;
 
-    // TODO: Check start and end have no collisions!
+    // Check start and end to ensure there's no collisions
+    const auto valid_start_and_end = IsValidArmConfiguration(opts.start_config, map) &&
+                                     IsValidArmConfiguration(opts.goal_config, map);
+
+    if (!valid_start_and_end)
+        std::cerr << std::endl << "Start or end config is invalid with this map..." << std::endl << std::endl;
 
     if (visualize)
     {
-        const auto configs = std::vector<ArmConfiguration>{ opts.arm_start_rads, opts.arm_end_rads };
+        const auto configs = std::vector<ArmConfiguration>{ opts.start_config, opts.goal_config };
         cv::imshow("Map", draw_configs(map.image, configs, opts.arm_link_length, opts.image_display_scale));
 
-        std::cout << std::endl << "Press any key to begin planning..." << std::endl << std::endl;
+        if (valid_start_and_end)
+            std::cout << std::endl << "Press any key to begin planning..." << std::endl << std::endl;
+
         cv::waitKey(0);
     }
 
+    if (!valid_start_and_end)
+        std::exit(EXIT_FAILURE);
+
     // Choose planner
     Planner *planner;
-    switch (opts.planner_type)
-    {
-        case PlannerType::RRT:
-            std::cout << "RRT Planner" << std::endl;
-            // TODO: Use modern ptrs
-            planner = new RRT;
-            break;
-        case PlannerType::RRTConnect:
-            std::cout << "RRT-Connect Planner" << std::endl;
-            planner = new RRTConnect;
-            break;
-        case PlannerType::RRTStar:
-            std::cout << "RRT* Planner" << std::endl;
-            planner = new RRTStar;
-            break;
-        case PlannerType::PRM:
-            std::cout << "PRM Planner" << std::endl;
-            planner = new PRM;
-            break;
-        default:
-            throw std::runtime_error("Unsupported planner type");
-    }
+    // switch (opts.planner_type)
+    // {
+    //     case PlannerType::RRT:
+    //         std::cout << "RRT Planner" << std::endl;
+    //         // TODO: Use modern ptrs
+    //         planner = new RRT(opts, map);
+    //         break;
+    //     case PlannerType::RRTConnect:
+    //         std::cout << "RRT-Connect Planner" << std::endl;
+    //         planner = new RRTConnect(opts, map);
+    //         break;
+    //     case PlannerType::RRTStar:
+    //         std::cout << "RRT* Planner" << std::endl;
+    //         planner = new RRTStar(opts, map);
+    //         break;
+    //     case PlannerType::PRM:
+    //         std::cout << "PRM Planner" << std::endl;
+    //         planner = new PRM(opts, map);
+    //         break;
+    //     default:
+    //         throw std::runtime_error("Unsupported planner type");
+    // }
 
     // TODO: Compute Plan
 
