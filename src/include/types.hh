@@ -2,7 +2,7 @@
 // types.hh
 //
 // Author: David Robinson
-// Date: 2019-11-22
+// Date: 2019-12-06
 //
 
 #pragma once

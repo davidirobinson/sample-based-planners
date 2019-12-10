@@ -20,12 +20,17 @@ struct RRTConnectOptions
 class RRTConnect : public Planner
 {
 	public:
+		RRTConnect(
+			const PlannerOptions &opts,
+			const Map &map,
+			const ArmConfiguration &start_config,
+			const ArmConfiguration &goal_config);
+
 		int plan(
 			double*** plan_out,
 			int* planlength,
 			double* num_samples,
-			double* path_quality
-		);
+			double* path_quality);
 
 	private:
 		bool connect(tree &T, const ArmConfiguration &new_config);

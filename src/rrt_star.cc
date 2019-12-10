@@ -8,6 +8,15 @@
 #include <rrt_star.hh>
 
 
+RRTStar::RRTStar(
+    const PlannerOptions &opts,
+    const Map &map,
+    const ArmConfiguration &start_config,
+    const ArmConfiguration &goal_config) :
+    Planner(opts, map, start_config, goal_config)
+{
+}
+
 int RRTStar::plan(
         double*** plan_out,
         int* planlength,
@@ -18,14 +27,14 @@ int RRTStar::plan(
 
     // Initialize Graph
     tree T;
-    T[start_config.id] = start_config;
+    T[start_config_.id] = start_config_;
 
-    double goal_dist = config_dist(start_config, goal_config);
+    double goal_dist = config_dist(start_config_, goal_config_);
     int count(0);
     while (true)
     {
         ArmConfiguration x_new;
-        if (generate_RRT_tree(T, goal_config, x_new))
+        if (generate_RRT_tree(T, goal_config_, x_new))
         {
             // Get neighbors of T around x_new
             auto X_near = get_neighbors(T, x_new, rewire_radius);
@@ -65,7 +74,7 @@ int RRTStar::plan(
             }
 
             // Check the distance to the goal as a status update
-            goal_dist = config_dist(get_nearest_neighbor(T, goal_config), goal_config);
+            goal_dist = config_dist(get_nearest_neighbor(T, goal_config_), goal_config_);
 
             if (goal_dist < angle_step_size)
             {
@@ -84,18 +93,18 @@ int RRTStar::plan(
     /************* Return Path *************/
 
     // Add goal to path
-    ArmConfiguration nearest_to_goal = get_nearest_neighbor(T, goal_config);
+    ArmConfiguration nearest_to_goal = get_nearest_neighbor(T, goal_config_);
 
-    goal_config.id = T.size();
-    goal_config.parent_id = nearest_to_goal.id;
-    T[goal_config.id] = goal_config;
+    goal_config_.id = T.size();
+    goal_config_.parent_id = nearest_to_goal.id;
+    T[goal_config_.id] = goal_config_;
 
     // Generate plan
     std::vector<ArmConfiguration> plan;
-    generate_path(plan, T, goal_config);
+    generate_path(plan, T, goal_config_);
     std::reverse(plan.begin(), plan.end());
 
     *num_samples = count;
-    assign_plan(plan_out, planlength, numofDOFs, plan, path_quality);
+    assign_plan(plan_out, planlength, opts_.arm_dof, plan, path_quality);
     return 1;
 }

@@ -6,10 +6,10 @@
 //
 
 #include <planner.hh>
-// #include <prm.hh>
-// #include <rrt_connect.hh>
-// #include <rrt_star.hh>
-// #include <rrt.hh>
+#include <prm.hh>
+#include <rrt_connect.hh>
+#include <rrt_star.hh>
+#include <rrt.hh>
 
 #include <types.hh>
 #include <check_valid.hh>
@@ -162,28 +162,28 @@ int main(int argc, char *argv[])
 
     // Choose planner
     Planner *planner;
-    // switch (opts.planner_type)
-    // {
-    //     case PlannerType::RRT:
-    //         std::cout << "RRT Planner" << std::endl;
-    //         // TODO: Use modern ptrs
-    //         planner = new RRT(opts, map);
-    //         break;
-    //     case PlannerType::RRTConnect:
-    //         std::cout << "RRT-Connect Planner" << std::endl;
-    //         planner = new RRTConnect(opts, map);
-    //         break;
-    //     case PlannerType::RRTStar:
-    //         std::cout << "RRT* Planner" << std::endl;
-    //         planner = new RRTStar(opts, map);
-    //         break;
-    //     case PlannerType::PRM:
-    //         std::cout << "PRM Planner" << std::endl;
-    //         planner = new PRM(opts, map);
-    //         break;
-    //     default:
-    //         throw std::runtime_error("Unsupported planner type");
-    // }
+    switch (opts.planner_type)
+    {
+        case PlannerType::RRT:
+            std::cout << "RRT Planner" << std::endl;
+            // TODO: Use modern ptrs
+            planner = new RRT(opts, map, opts.start_config, opts.goal_config);
+            break;
+        case PlannerType::RRTConnect:
+            std::cout << "RRT-Connect Planner" << std::endl;
+            planner = new RRTConnect(opts, map, opts.start_config, opts.goal_config);
+            break;
+        case PlannerType::RRTStar:
+            std::cout << "RRT* Planner" << std::endl;
+            planner = new RRTStar(opts, map, opts.start_config, opts.goal_config);
+            break;
+        case PlannerType::PRM:
+            std::cout << "PRM Planner" << std::endl;
+            planner = new PRM(opts, map, opts.start_config, opts.goal_config);
+            break;
+        default:
+            throw std::runtime_error("Unsupported planner type");
+    }
 
     // TODO: Compute Plan
 

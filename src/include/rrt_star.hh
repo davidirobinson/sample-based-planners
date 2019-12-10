@@ -20,12 +20,18 @@ struct RRTStarOptions
 class RRTStar : public Planner
 {
 	public:
+		RRTStar(
+			const PlannerOptions &opts,
+			const Map &map,
+			const ArmConfiguration &start_config,
+			const ArmConfiguration &goal_config);
+
 		int plan(
 			double*** plan_out,
 			int* planlength,
 			double* num_samples,
-			double* path_quality
-		);
+			double* path_quality);
+
 	private:
 		const long timeout = 50000; // lower than the rest!
 		const double rewire_radius = 0.5;

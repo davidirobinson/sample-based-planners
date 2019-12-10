@@ -37,6 +37,6 @@ void get_current_point(bresenham_param_t *params, int *x, int *y);
 
 int get_next_point(bresenham_param_t *params);
 
-int IsValidLineSegment(double x0, double y0, double x1, double y1, const Map &map);
+bool IsValidLineSegment(const double x0, const double y0, const double x1, const double y1, const Map &map);
 
 bool IsValidArmConfiguration(const ArmConfiguration &config, const Map &map);

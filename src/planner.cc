@@ -8,9 +8,15 @@
 #include <planner.hh>
 
 
-Planner::Planner(const PlannerOptions &opts, const Map &map) :
+Planner::Planner(
+    const PlannerOptions &opts,
+    const Map &map,
+    const ArmConfiguration &start_config,
+    const ArmConfiguration &goal_config) :
     opts_(opts),
     map_(map),
+    start_config_(start_config),
+    goal_config_(goal_config),
     random_(std::default_random_engine(rd()))
 {
 }
@@ -64,12 +70,12 @@ ArmConfiguration Planner::sample_config(const double &p_goal)
     std::uniform_real_distribution<double> angle(0,2*M_PI);
 
     if (probability(random_) < p_goal)
-        return opts_.goal_config;
+        return goal_config_;
 
     ArmConfiguration random_config;
-    random_config.angles.resize(opts_.goal_config.angles.size());
+    random_config.angles.resize(goal_config_.angles.size());
 
-    for (int i = 0; i < opts_.goal_config.angles.size(); i++)
+    for (int i = 0; i < goal_config_.angles.size(); i++)
         random_config.angles[i] = angle(random_);
 
     return random_config;
@@ -117,7 +123,7 @@ ArmConfiguration Planner::extend(const ArmConfiguration &nearest, const ArmConfi
 
 bool Planner::no_collisions(ArmConfiguration start_config, ArmConfiguration goal_config)
 {
-    for (double i=0; i<=interp_samples; i+=1.0)
+    for (double i = 0; i <= interp_samples; i += 1.0)
     {
         double u = i / interp_samples;
 

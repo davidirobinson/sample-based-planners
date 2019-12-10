@@ -96,7 +96,11 @@ struct PlannerOptions
 class Planner
 {
 	public:
-		Planner(const PlannerOptions &opts, const Map &map);
+		Planner(
+			const PlannerOptions &opts,
+			const Map &map,
+			const ArmConfiguration &start_config,
+			const ArmConfiguration &goal_config);
 
 		virtual int plan(
 			double*** plan_out,
@@ -136,6 +140,9 @@ class Planner
 
 		const PlannerOptions opts_;
 		const Map map_;
+
+		ArmConfiguration start_config_;
+		ArmConfiguration goal_config_;
 
 		std::random_device rd;
 		std::default_random_engine random_;

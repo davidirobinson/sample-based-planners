@@ -20,12 +20,17 @@ struct PRMOptions
 class PRM : public Planner
 {
 	public:
+		PRM(
+			const PlannerOptions &opts,
+			const Map &map,
+			const ArmConfiguration &start_config,
+			const ArmConfiguration &goal_config);
+
 		int plan(
 			double*** plan_out,
 			int* planlength,
 			double* num_samples,
-			double* path_quality
-		);
+			double* path_quality);
 
 	private:
 		const double PRM_thresh = 1.5;

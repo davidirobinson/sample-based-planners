@@ -8,6 +8,15 @@
 #include <rrt_connect.hh>
 
 
+RRTConnect::RRTConnect(
+    const PlannerOptions &opts,
+    const Map &map,
+    const ArmConfiguration &start_config,
+    const ArmConfiguration &goal_config) :
+    Planner(opts, map, start_config, goal_config)
+{
+}
+
 bool RRTConnect::connect(tree &T, const ArmConfiguration &new_config)
 {
     ArmConfiguration nearest_config = get_nearest_neighbor(T, new_config);
@@ -60,8 +69,8 @@ int RRTConnect::plan(
 
     // Setup graph
     tree T_start, T_goal;
-    T_start[start_config.id] = start_config;
-    T_goal[goal_config.id] = goal_config;
+    T_start[start_config_.id] = start_config_;
+    T_goal[goal_config_.id] = goal_config_;
 
     ArmConfiguration T_start_end, T_goal_end, extended_config;
 
@@ -71,14 +80,14 @@ int RRTConnect::plan(
     {
         if (T_switch)
         {
-            if (generate_RRT_tree(T_start, goal_config, extended_config))
+            if (generate_RRT_tree(T_start, goal_config_, extended_config))
             {
                 if (connect(T_goal, extended_config)) break;
             }
         }
         else
         {
-            if (generate_RRT_tree(T_goal, start_config, extended_config))
+            if (generate_RRT_tree(T_goal, start_config_, extended_config))
             {
                 if (connect(T_start, extended_config)) break;
             }
@@ -104,7 +113,7 @@ int RRTConnect::plan(
     // Append from meeting point to goal
     generate_path(plan, T_goal, get_nearest_neighbor(T_goal,  extended_config));
 
-    assign_plan(plan_out, planlength, numofDOFs, plan, path_quality);
+    assign_plan(plan_out, planlength, opts_.arm_dof, plan, path_quality);
     *num_samples = count;
     return 1;
 }

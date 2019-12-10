@@ -8,6 +8,15 @@
 #include <prm.hh>
 
 
+PRM::PRM(
+    const PlannerOptions &opts,
+    const Map &map,
+    const ArmConfiguration &start_config,
+    const ArmConfiguration &goal_config) :
+    Planner(opts, map, start_config, goal_config)
+{
+}
+
 bool PRM::dijkstra(tree &T, ArmConfiguration start, ArmConfiguration goal)
 {
     std::vector<ArmConfiguration> plan;
@@ -106,7 +115,6 @@ bool PRM::dijkstra(tree &T, ArmConfiguration start, ArmConfiguration goal)
     return false;
 }
 
-
 int PRM::plan(
         double*** plan_out,
         int* planlength,
@@ -143,11 +151,11 @@ int PRM::plan(
             }
 
             // Check for valid path to goal
-            PRM_start_config = get_nearest_neighbor(PRM, start_config);
-            PRM_goal_config = get_nearest_neighbor(PRM, goal_config);
+            PRM_start_config = get_nearest_neighbor(PRM, start_config_);
+            PRM_goal_config = get_nearest_neighbor(PRM, goal_config_);
 
-            if (no_collisions(start_config, PRM_start_config) &&
-                no_collisions(goal_config, PRM_goal_config))
+            if (no_collisions(start_config_, PRM_start_config) &&
+                no_collisions(goal_config_, PRM_goal_config))
             {
                 valid_start_goal_connections = true;
             }
@@ -179,12 +187,12 @@ int PRM::plan(
         return 0;
     }
 
-    plan.push_back(goal_config);
+    plan.push_back(goal_config_);
     generate_path(plan, PRM, PRM[PRM_goal_config.id]);
-    plan.push_back(start_config);
+    plan.push_back(start_config_);
     std::reverse(plan.begin(), plan.end());
 
     *num_samples = PRM_samples;
-    assign_plan(plan_out, planlength, numofDOFs, plan, path_quality);
+    assign_plan(plan_out, planlength, opts_.arm_dof, plan, path_quality);
     return 1;
 }

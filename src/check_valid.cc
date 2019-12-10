@@ -114,7 +114,7 @@ int get_next_point(bresenham_param_t *params)
 	return 1;
 }
 
-int IsValidLineSegment(double x0, double y0, double x1, double y1, const Map &map)
+bool IsValidLineSegment(const double x0, const double y0, const double x1, const double y1, const Map &map)
 {
 	bresenham_param_t params;
 	int nX, nY;
@@ -158,8 +158,6 @@ bool IsValidArmConfiguration(const ArmConfiguration &config, const Map &map)
 		y0 = y1;
 		x1 = x0 + LINKLENGTH_CELLS * cos(angle);
 		y1 = y0 + LINKLENGTH_CELLS * sin(angle);
-
-		std::cout << "checking " << x0 << "," << y0 << " to " << x1 << "," << y1 << std::endl;
 
 		// Check the validity of the corresponding line segment
 		if (!IsValidLineSegment(x0, y0, x1, y1, map))
