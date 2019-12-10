@@ -24,6 +24,8 @@
 #include <json/json.h>
 
 
+double config_dist(const ArmConfiguration &a, const ArmConfiguration &b);
+
 struct PlannerOptions
 {
     PlannerType planner_type = PlannerType::RRTConnect;
@@ -90,9 +92,27 @@ struct PlannerOptions
     }
 };
 
-/*
- * Base Class for Planners
- */
+struct Plan
+{
+	bool valid;
+	std::vector<ArmConfiguration> configs;
+	double path_length;
+
+	Plan() :
+		valid(false)
+	{
+	}
+
+	explicit Plan(const std::vector<ArmConfiguration> &config_vector) :
+		valid(true),
+		configs(config_vector),
+		path_length(0.0)
+	{
+		for (size_t i = 1; i < configs.size(); i++)
+			path_length += config_dist(configs[i - 1], configs[i]);
+	}
+};
+
 class Planner
 {
 	public:
@@ -102,21 +122,9 @@ class Planner
 			const ArmConfiguration &start_config,
 			const ArmConfiguration &goal_config);
 
-		virtual int plan(
-			double*** plan_out,
-			int* planlength,
-			double* num_samples,
-			double* path_quality) = 0;
+		virtual Plan plan() = 0;
 
 	protected:
-		double config_dist(const ArmConfiguration &a, const ArmConfiguration &b);
-
-		void assign_plan(
-			double*** plan_array,
-			int* planlength,
-			int numofDOFs,
-			std::vector<ArmConfiguration> &plan_vector,
-			double* path_quality);
 
 		ArmConfiguration sample_config(const double &p_goal);
 
@@ -131,7 +139,10 @@ class Planner
 			const ArmConfiguration &goal_config,
 			ArmConfiguration &extended_config);
 
-		void generate_path(std::vector<ArmConfiguration> &plan, tree &T, ArmConfiguration parent);
+		void generate_path(
+			std::vector<ArmConfiguration> &plan,
+			tree &T,
+			ArmConfiguration parent);
 
 		std::vector<int> get_neighbors(
 			const tree &T,

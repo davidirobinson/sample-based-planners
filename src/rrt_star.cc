@@ -17,11 +17,7 @@ RRTStar::RRTStar(
 {
 }
 
-int RRTStar::plan(
-        double*** plan_out,
-        int* planlength,
-        double* num_samples,
-        double* path_quality)
+Plan RRTStar::plan()
 {
     /************* Generate RRT Star *************/
 
@@ -44,10 +40,8 @@ int RRTStar::plan(
             generate_path(path, T, x_new);
 
             double current_cost = 0.0;
-            for(int i=1; i<path.size(); i++)
-            {
-                current_cost += config_dist(path[i-1],path[i]);
-            }
+            for(size_t i = 1; i < path.size(); i++)
+                current_cost += config_dist(path[i - 1],path[i]);
 
             // As far as I interpret the RRT* algorithm,
             // we can just do the extention in 1x loop
@@ -84,8 +78,8 @@ int RRTStar::plan(
 
         if (count > timeout) // lower timeout
         {
-            std::cout << "Timeout" << std::endl;
-            return 0;
+            std::cerr << "Timeout" << std::endl;
+            return Plan();
         }
         count++;
     }
@@ -103,8 +97,5 @@ int RRTStar::plan(
     std::vector<ArmConfiguration> plan;
     generate_path(plan, T, goal_config_);
     std::reverse(plan.begin(), plan.end());
-
-    *num_samples = count;
-    assign_plan(plan_out, planlength, opts_.arm_dof, plan, path_quality);
-    return 1;
+    return Plan(plan);
 }

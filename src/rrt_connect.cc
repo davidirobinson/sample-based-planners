@@ -58,12 +58,7 @@ bool RRTConnect::connect(tree &T, const ArmConfiguration &new_config)
     return false;
 }
 
-
-int RRTConnect::plan(
-        double*** plan_out,
-        int* planlength,
-        double* num_samples,
-        double* path_quality)
+Plan RRTConnect::plan()
 {
     /************* Generate RRT-Connect *************/
 
@@ -97,8 +92,8 @@ int RRTConnect::plan(
         count++;
         if (count > timeout)
         {
-            std::cout << "Timeout" << std::endl;
-            return 0;
+            std::cerr << "Timeout" << std::endl;
+            return Plan();
         }
     }
 
@@ -113,7 +108,5 @@ int RRTConnect::plan(
     // Append from meeting point to goal
     generate_path(plan, T_goal, get_nearest_neighbor(T_goal,  extended_config));
 
-    assign_plan(plan_out, planlength, opts_.arm_dof, plan, path_quality);
-    *num_samples = count;
-    return 1;
+    return Plan(plan);
 }

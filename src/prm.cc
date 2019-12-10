@@ -115,11 +115,7 @@ bool PRM::dijkstra(tree &T, ArmConfiguration start, ArmConfiguration goal)
     return false;
 }
 
-int PRM::plan(
-        double*** plan_out,
-        int* planlength,
-        double* num_samples,
-        double* path_quality)
+Plan PRM::plan()
 {
     /************* Generate PRM *************/
 
@@ -170,8 +166,8 @@ int PRM::plan(
             }
             else if (PRM_samples > timeout)
             {
-                std::cout << "Timeout" << std::endl;
-                return 0;
+                std::cerr << "Timeout" << std::endl;
+                return Plan();
             }
         }
     }
@@ -184,15 +180,12 @@ int PRM::plan(
     if (!dijkstra(PRM, PRM_start_config, PRM_goal_config))
     {
         std::cout << "Invalid Graph" << std::endl;
-        return 0;
+        return Plan();
     }
 
     plan.push_back(goal_config_);
     generate_path(plan, PRM, PRM[PRM_goal_config.id]);
     plan.push_back(start_config_);
     std::reverse(plan.begin(), plan.end());
-
-    *num_samples = PRM_samples;
-    assign_plan(plan_out, planlength, opts_.arm_dof, plan, path_quality);
-    return 1;
+    return Plan(plan);
 }

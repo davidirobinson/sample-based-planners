@@ -17,12 +17,7 @@ RRT::RRT(
 {
 }
 
-int RRT::plan(
-        double*** plan_out,
-        int* planlength,
-        double* num_samples,
-        double* path_quality
-)
+Plan RRT::plan()
 {
     /************* Generate RRT *************/
 
@@ -55,8 +50,8 @@ int RRT::plan(
 
         if (count > timeout)
         {
-            std::cout << "Timeout" << std::endl;
-            return 0;
+            std::cerr << "Timeout" << std::endl;
+            return Plan();
         }
         count++;
     }
@@ -66,8 +61,5 @@ int RRT::plan(
     std::vector<ArmConfiguration> plan;
     generate_path(plan, T_start, goal_config_);
     std::reverse(plan.begin(), plan.end());
-
-    assign_plan(plan_out, planlength, opts_.arm_dof, plan, path_quality);
-    *num_samples = count;
-    return 1;
+    return Plan(plan);
 }

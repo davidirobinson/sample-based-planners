@@ -26,11 +26,7 @@ class RRTStar : public Planner
 			const ArmConfiguration &start_config,
 			const ArmConfiguration &goal_config);
 
-		int plan(
-			double*** plan_out,
-			int* planlength,
-			double* num_samples,
-			double* path_quality);
+		Plan plan();
 
 	private:
 		const long timeout = 50000; // lower than the rest!

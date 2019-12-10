@@ -8,20 +8,7 @@
 #include <planner.hh>
 
 
-Planner::Planner(
-    const PlannerOptions &opts,
-    const Map &map,
-    const ArmConfiguration &start_config,
-    const ArmConfiguration &goal_config) :
-    opts_(opts),
-    map_(map),
-    start_config_(start_config),
-    goal_config_(goal_config),
-    random_(std::default_random_engine(rd()))
-{
-}
-
-double Planner::config_dist(const ArmConfiguration &a, const ArmConfiguration &b)
+double config_dist(const ArmConfiguration &a, const ArmConfiguration &b)
 {
     // www.codeproject.com/Articles/59789/Calculate-the-Real-Difference-Between-Two-Angles-K
     double ssd = 0.0;
@@ -36,32 +23,17 @@ double Planner::config_dist(const ArmConfiguration &a, const ArmConfiguration &b
     return sqrt(ssd);
 }
 
-void Planner::assign_plan(
-    double*** plan_array,
-    int* planlength,
-    int numofDOFs,
-    std::vector<ArmConfiguration> &plan_vector,
-    double* path_quality)
+Planner::Planner(
+    const PlannerOptions &opts,
+    const Map &map,
+    const ArmConfiguration &start_config,
+    const ArmConfiguration &goal_config) :
+    opts_(opts),
+    map_(map),
+    start_config_(start_config),
+    goal_config_(goal_config),
+    random_(std::default_random_engine(rd()))
 {
-    int length = plan_vector.size();
-
-    double path_length = 0;
-    for (int i=1; i<length; i++)
-    {
-        path_length += config_dist(plan_vector[i-1], plan_vector[i]);
-    }
-
-    *plan_array = (double**) malloc(length*sizeof(double*));
-    for (int i=0; i<length; i++)
-    {
-        (*plan_array)[i] = (double*) malloc(numofDOFs*sizeof(double));
-        for(int j = 0; j < numofDOFs; j++)
-        {
-            (*plan_array)[i][j] = plan_vector[i].angles[j];
-        }
-    }
-    *planlength = length;
-    *path_quality = path_length;
 }
 
 ArmConfiguration Planner::sample_config(const double &p_goal)
@@ -102,23 +74,17 @@ ArmConfiguration Planner::get_nearest_neighbor(
 ArmConfiguration Planner::extend(const ArmConfiguration &nearest, const ArmConfiguration &sampled)
 {
     double dist = config_dist(nearest, sampled);
-
-    if (angle_step_size < dist)
-    {
-        double u = angle_step_size / dist;
-
-        ArmConfiguration interp;
-        interp.angles.resize(nearest.angles.size());
-        for (int i=0; i<interp.angles.size(); i++)
-        {
-            interp.angles[i] = (1-u)*nearest.angles[i] + (u)*sampled.angles[i];
-        }
-        return interp;
-    }
-    else
-    {
+    if (angle_step_size >= dist)
         return sampled;
-    }
+
+    ArmConfiguration interp;
+    interp.angles.resize(nearest.angles.size());
+
+    double u = angle_step_size / dist;
+    for (size_t i = 0; i < interp.angles.size(); i++)
+        interp.angles[i] = (1 - u) * nearest.angles[i] + u * sampled.angles[i];
+
+    return interp;
 }
 
 bool Planner::no_collisions(ArmConfiguration start_config, ArmConfiguration goal_config)
@@ -130,10 +96,8 @@ bool Planner::no_collisions(ArmConfiguration start_config, ArmConfiguration goal
         ArmConfiguration interp;
         interp.angles.resize(start_config.angles.size());
 
-        for (int i=0; i<interp.angles.size(); i++)
-        {
-            interp.angles[i] = (1-u)*start_config.angles[i] + (u)*goal_config.angles[i];
-        }
+        for (size_t i = 0; i < interp.angles.size(); i++)
+            interp.angles[i] = (1 - u) * start_config.angles[i] + u * goal_config.angles[i];
 
         if (!IsValidArmConfiguration(interp, map_))
             return false;
@@ -163,7 +127,7 @@ bool Planner::generate_RRT_tree(
 
 void Planner::generate_path(std::vector<ArmConfiguration> &plan, tree &T, ArmConfiguration parent)
 {
-    int count = 0;
+    size_t count = 0;
     while (count < timeout)
     {
         plan.push_back(parent);

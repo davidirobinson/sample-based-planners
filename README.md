@@ -20,6 +20,5 @@ libjsoncpp & OpenCV >= 3.0
 
 ## TODO
 
-- Execute plan & verify success
 - Animate arm trajectory for successful plan
 - Update Docs

@@ -185,7 +185,18 @@ int main(int argc, char *argv[])
             throw std::runtime_error("Unsupported planner type");
     }
 
-    // TODO: Compute Plan
+    // Compute Plan
+    const auto plan = planner->plan();
+
+    if (!plan.valid)
+    {
+        std::cout << "Planner failed" << std::endl;
+        std::exit(EXIT_FAILURE);
+    }
+
+    std::cout << "Planner succeded" << std::endl;
+    for (const auto &config : plan.configs)
+        std::cout << config << std::endl;
 
     // TODO: Playback finished plan
 
