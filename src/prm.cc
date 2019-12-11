@@ -117,6 +117,8 @@ bool PRM::dijkstra(tree &T, ArmConfiguration start, ArmConfiguration goal)
 
 Plan PRM::plan()
 {
+    const auto start_time = std::chrono::steady_clock::now();
+
     /************* Generate PRM *************/
 
     tree PRM;
@@ -167,7 +169,7 @@ Plan PRM::plan()
             else if (PRM_samples > timeout)
             {
                 std::cerr << "Timeout" << std::endl;
-                return Plan();
+                return Plan(start_time);
             }
         }
     }
@@ -180,12 +182,12 @@ Plan PRM::plan()
     if (!dijkstra(PRM, PRM_start_config, PRM_goal_config))
     {
         std::cout << "Invalid Graph" << std::endl;
-        return Plan();
+        return Plan(start_time);
     }
 
     plan.push_back(goal_config_);
     generate_path(plan, PRM, PRM[PRM_goal_config.id]);
     plan.push_back(start_config_);
     std::reverse(plan.begin(), plan.end());
-    return Plan(plan);
+    return Plan(plan, start_time);
 }

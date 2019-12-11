@@ -19,6 +19,8 @@ RRT::RRT(
 
 Plan RRT::plan()
 {
+    const auto start_time = std::chrono::steady_clock::now();
+
     /************* Generate RRT *************/
 
     // Setup graph
@@ -51,7 +53,7 @@ Plan RRT::plan()
         if (count > timeout)
         {
             std::cerr << "Timeout" << std::endl;
-            return Plan();
+            return Plan(start_time);
         }
         count++;
     }
@@ -61,5 +63,5 @@ Plan RRT::plan()
     std::vector<ArmConfiguration> plan;
     generate_path(plan, T_start, goal_config_);
     std::reverse(plan.begin(), plan.end());
-    return Plan(plan);
+    return Plan(plan, start_time);
 }

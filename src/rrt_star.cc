@@ -19,6 +19,8 @@ RRTStar::RRTStar(
 
 Plan RRTStar::plan()
 {
+    const auto start_time = std::chrono::steady_clock::now();
+
     /************* Generate RRT Star *************/
 
     // Initialize Graph
@@ -79,7 +81,7 @@ Plan RRTStar::plan()
         if (count > timeout) // lower timeout
         {
             std::cerr << "Timeout" << std::endl;
-            return Plan();
+            return Plan(start_time);
         }
         count++;
     }
@@ -97,5 +99,5 @@ Plan RRTStar::plan()
     std::vector<ArmConfiguration> plan;
     generate_path(plan, T, goal_config_);
     std::reverse(plan.begin(), plan.end());
-    return Plan(plan);
+    return Plan(plan, start_time);
 }

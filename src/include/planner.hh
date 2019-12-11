@@ -8,7 +8,7 @@
 #pragma once
 
 #include <math.h>
-#include <ctime>
+#include <chrono>
 #include <unistd.h>
 #include <iostream>
 #include <algorithm>
@@ -96,20 +96,25 @@ struct Plan
 {
 	bool valid;
 	std::vector<ArmConfiguration> configs;
-	double path_length;
+	double length;
+	std::chrono::duration<double> duration;
 
-	Plan() :
-		valid(false)
+	Plan(const std::chrono::steady_clock::time_point &start_time) :
+		valid(false),
+		duration(std::chrono::steady_clock::now() - start_time)
 	{
 	}
 
-	explicit Plan(const std::vector<ArmConfiguration> &config_vector) :
+	explicit Plan(
+		const std::vector<ArmConfiguration> &config_vector,
+		const std::chrono::steady_clock::time_point &start_time) :
 		valid(true),
 		configs(config_vector),
-		path_length(0.0)
+		length(0.0),
+		duration(std::chrono::steady_clock::now() - start_time)
 	{
 		for (size_t i = 1; i < configs.size(); i++)
-			path_length += config_dist(configs[i - 1], configs[i]);
+			length += config_dist(configs[i - 1], configs[i]);
 	}
 };
 

@@ -145,12 +145,12 @@ int main(int argc, char *argv[])
                                      IsValidArmConfiguration(opts.goal_config, map);
 
     if (!valid_start_and_end)
-        std::cerr << std::endl << "Start or end config is invalid with this map..." << std::endl << std::endl;
+        std::cerr << std::endl << "Start or end config is invalid with this map..." << std::endl;
 
     if (visualize)
     {
         if (valid_start_and_end)
-            std::cout << std::endl << "Press any key to begin planning..." << std::endl << std::endl;
+            std::cout << std::endl << "Press any key to begin planning..." << std::endl;
 
         const auto configs = std::vector<ArmConfiguration>{ opts.start_config, opts.goal_config };
         cv::imshow("Map", draw_configs(map.image, configs, opts.arm_link_length, opts.display_scale));
@@ -181,16 +181,16 @@ int main(int argc, char *argv[])
             throw std::runtime_error("Unsupported planner type");
     }
 
-    // Compute & display Plan
+    // Compute & display plan
     const auto plan = planner->plan();
 
     if (!plan.valid)
     {
-        std::cout << "Planner failed." << std::endl;
+        std::cout << std::endl << "Planner failed." << plan.duration.count() << " seconds" << std::endl;
         std::exit(EXIT_FAILURE);
     }
 
-    std::cout << "Planner succeded:" << std::endl;
+    std::cout << std::endl << "Planner succeded in " << plan.duration.count() << " seconds" << std::endl;
     for (const auto &config : plan.configs)
     {
         std::cout << config << std::endl;

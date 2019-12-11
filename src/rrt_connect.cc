@@ -60,6 +60,8 @@ bool RRTConnect::connect(tree &T, const ArmConfiguration &new_config)
 
 Plan RRTConnect::plan()
 {
+    const auto start_time = std::chrono::steady_clock::now();
+
     /************* Generate RRT-Connect *************/
 
     // Setup graph
@@ -93,7 +95,7 @@ Plan RRTConnect::plan()
         if (count > timeout)
         {
             std::cerr << "Timeout" << std::endl;
-            return Plan();
+            return Plan(start_time);
         }
     }
 
@@ -108,5 +110,5 @@ Plan RRTConnect::plan()
     // Append from meeting point to goal
     generate_path(plan, T_goal, get_nearest_neighbor(T_goal,  extended_config));
 
-    return Plan(plan);
+    return Plan(plan, start_time);
 }
