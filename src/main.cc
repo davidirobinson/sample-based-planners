@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
     const auto config_json = read_json(config_path);
     const auto opts = PlannerOptions(config_json);
 
-    std::cout << "Loaded " << map.data.size() << " x " << map.data.at(0).size() << " map." << std::endl;
+    std::cout << "Loaded " << map.data.size() << "x" << map.data.at(0).size() << " map." << std::endl;
     std::cout << "Loaded " << opts.arm_dof << " dof arm." << std::endl;
     std::cout << "Start angles (degrees): " << opts.start_config << std::endl;
     std::cout << "End angles (degrees): " << opts.goal_config << std::endl;
@@ -148,13 +148,13 @@ int main(int argc, char *argv[])
 
     if (visualize)
     {
-        const auto configs = std::vector<ArmConfiguration>{ opts.start_config, opts.goal_config };
-        cv::imshow("Map", draw_configs(map.image, configs, opts.arm_link_length, opts.image_display_scale));
-
         if (valid_start_and_end)
             std::cout << std::endl << "Press any key to begin planning..." << std::endl << std::endl;
 
+        const auto configs = std::vector<ArmConfiguration>{ opts.start_config, opts.goal_config };
+        cv::imshow("Map", draw_configs(map.image, configs, opts.arm_link_length, opts.image_display_scale));
         cv::waitKey(0);
+        cv::destroyAllWindows();
     }
 
     if (!valid_start_and_end)
@@ -190,13 +190,22 @@ int main(int argc, char *argv[])
 
     if (!plan.valid)
     {
-        std::cout << "Planner failed" << std::endl;
+        std::cout << std::endl << "Planner failed." << std::endl;
         std::exit(EXIT_FAILURE);
     }
 
-    std::cout << "Planner succeded" << std::endl;
+    std::cout << std::endl << "Planner succeded:" << std::endl;
     for (const auto &config : plan.configs)
+    {
         std::cout << config << std::endl;
+
+        if (visualize)
+        {
+            cv::imshow("Map", draw_configs(map.image, { config }, opts.arm_link_length, opts.image_display_scale));
+            cv::waitKey(0);
+        }
+    }
+
 
     // TODO: Playback finished plan
 

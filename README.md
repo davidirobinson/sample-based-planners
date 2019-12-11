@@ -17,8 +17,3 @@ libjsoncpp & OpenCV >= 3.0
 
     cd build/src/
     ./sample_based_planner -c ../../config.json -m ../../test/map_01.pgm -v
-
-## TODO
-
-- Animate arm trajectory for successful plan
-- Update Docs
