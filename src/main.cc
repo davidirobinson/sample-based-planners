@@ -14,9 +14,10 @@
 #include <types.hh>
 #include <check_valid.hh>
 
-#include <string>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <memory>
+#include <string>
 #include <unistd.h>
 
 #include <json/json.h>
@@ -152,7 +153,7 @@ int main(int argc, char *argv[])
             std::cout << std::endl << "Press any key to begin planning..." << std::endl << std::endl;
 
         const auto configs = std::vector<ArmConfiguration>{ opts.start_config, opts.goal_config };
-        cv::imshow("Map", draw_configs(map.image, configs, opts.arm_link_length, opts.image_display_scale));
+        cv::imshow("Map", draw_configs(map.image, configs, opts.arm_link_length, opts.display_scale));
         cv::waitKey(0);
         cv::destroyAllWindows();
     }
@@ -161,53 +162,45 @@ int main(int argc, char *argv[])
         std::exit(EXIT_FAILURE);
 
     // Choose planner
-    Planner *planner;
+    std::unique_ptr<Planner> planner;
     switch (opts.planner_type)
     {
         case PlannerType::RRT:
-            std::cout << "RRT Planner" << std::endl;
-            // TODO: Use modern ptrs
-            planner = new RRT(opts, map, opts.start_config, opts.goal_config);
+            planner = std::make_unique<RRT>(RRT(opts, map, opts.start_config, opts.goal_config));
             break;
         case PlannerType::RRTConnect:
-            std::cout << "RRT-Connect Planner" << std::endl;
-            planner = new RRTConnect(opts, map, opts.start_config, opts.goal_config);
+            planner = std::make_unique<RRTConnect>(RRTConnect(opts, map, opts.start_config, opts.goal_config));
             break;
         case PlannerType::RRTStar:
-            std::cout << "RRT* Planner" << std::endl;
-            planner = new RRTStar(opts, map, opts.start_config, opts.goal_config);
+            planner = std::make_unique<RRTStar>(RRTStar(opts, map, opts.start_config, opts.goal_config));
             break;
         case PlannerType::PRM:
-            std::cout << "PRM Planner" << std::endl;
-            planner = new PRM(opts, map, opts.start_config, opts.goal_config);
+            planner = std::make_unique<PRM>(PRM(opts, map, opts.start_config, opts.goal_config));
             break;
         default:
             throw std::runtime_error("Unsupported planner type");
     }
 
-    // Compute Plan
+    // Compute & display Plan
     const auto plan = planner->plan();
 
     if (!plan.valid)
     {
-        std::cout << std::endl << "Planner failed." << std::endl;
+        std::cout << "Planner failed." << std::endl;
         std::exit(EXIT_FAILURE);
     }
 
-    std::cout << std::endl << "Planner succeded:" << std::endl;
+    std::cout << "Planner succeded:" << std::endl;
     for (const auto &config : plan.configs)
     {
         std::cout << config << std::endl;
 
         if (visualize)
         {
-            cv::imshow("Map", draw_configs(map.image, { config }, opts.arm_link_length, opts.image_display_scale));
+            cv::imshow("Map", draw_configs(map.image, { config }, opts.arm_link_length, opts.display_scale));
             cv::waitKey(0);
         }
     }
-
-
-    // TODO: Playback finished plan
 
     std::exit(EXIT_SUCCESS);
 }

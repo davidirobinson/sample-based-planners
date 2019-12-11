@@ -32,14 +32,23 @@ Planner::Planner(
     map_(map),
     start_config_(start_config),
     goal_config_(goal_config),
-    random_(std::default_random_engine(rd()))
+    random_(std::default_random_engine(rd_()))
+{
+}
+
+Planner::Planner(Planner&& other) :
+    opts_(other.opts_),
+    map_(other.map_),
+    start_config_(other.start_config_),
+    goal_config_(other.goal_config_),
+    random_(other.random_)
 {
 }
 
 ArmConfiguration Planner::sample_config(const double &p_goal)
 {
-    std::uniform_real_distribution<double> probability(0,1);
-    std::uniform_real_distribution<double> angle(0,2*M_PI);
+    std::uniform_real_distribution<double> probability(0, 1);
+    std::uniform_real_distribution<double> angle(0, 2 * M_PI);
 
     if (probability(random_) < p_goal)
         return goal_config_;

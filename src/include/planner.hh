@@ -34,7 +34,7 @@ struct PlannerOptions
 	ArmConfiguration goal_config;
 	size_t arm_dof;
 	double arm_link_length;
-	double image_display_scale = 5.0;
+	double display_scale = 5.0;
 
 	PlannerOptions()
 	{
@@ -88,7 +88,7 @@ struct PlannerOptions
 			throw std::runtime_error("invalid dofs: " + std::to_string(arm_dof) + ", it should be at least 2");
 
 		arm_link_length = json["general"]["arm_link_length"].asDouble();
-		image_display_scale = json["general"]["image_display_scale"].asDouble();
+		display_scale = json["general"]["image_display_scale"].asDouble();
     }
 };
 
@@ -122,10 +122,12 @@ class Planner
 			const ArmConfiguration &start_config,
 			const ArmConfiguration &goal_config);
 
+		// TODO: Rule of 5
+		Planner(Planner&& other);
+
 		virtual Plan plan() = 0;
 
 	protected:
-
 		ArmConfiguration sample_config(const double &p_goal);
 
 		ArmConfiguration get_nearest_neighbor(const tree &configs, const ArmConfiguration &new_config);
@@ -155,7 +157,7 @@ class Planner
 		ArmConfiguration start_config_;
 		ArmConfiguration goal_config_;
 
-		std::random_device rd;
+		std::random_device rd_;
 		std::default_random_engine random_;
 
 		/*
