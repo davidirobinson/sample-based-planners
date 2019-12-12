@@ -1,17 +1,23 @@
 {
     "general":
     {
-        "planner": "rrtconnect",
-        "units": "degrees",
-        "arm_start":
+        "arm_start_degrees":
         [
             0, 45, 0, -45, 0
         ],
-        "arm_end":
+        "arm_end_degrees":
         [
             45, 45, 90, 90, 135
         ],
         "arm_link_length": 10,
         "image_display_scale": 10.0
+    },
+    "planner":
+    {
+        "type": "rrt",
+        "timeout_s": 200000,
+        "interp_samples": 50,
+        "angle_step_size": 0.5,
+        "p_goal_sample": 0.05
     }
 }

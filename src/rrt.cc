@@ -12,8 +12,9 @@ RRT::RRT(
     const PlannerOptions &opts,
     const Map &map,
     const ArmConfiguration &start_config,
-    const ArmConfiguration &goal_config) :
-    Planner(opts, map, start_config, goal_config)
+    const ArmConfiguration &goal_config,
+    const double arm_link_length) :
+    Planner(opts, map, start_config, goal_config, arm_link_length)
 {
 }
 
@@ -38,7 +39,7 @@ Plan RRT::plan()
             ArmConfiguration nearest_to_goal = get_nearest_neighbor(T_start, goal_config_);
             goal_dist = config_dist(nearest_to_goal, goal_config_);
 
-            if (goal_dist < angle_step_size)
+            if (goal_dist < opts_.angle_step_size)
             {
                 // Add goal to tree
                 goal_config_.id = T_start.size();
@@ -50,7 +51,7 @@ Plan RRT::plan()
             }
         }
 
-        if (count > timeout)
+        if (count > opts_.timeout_s)
         {
             std::cerr << "Timeout" << std::endl;
             return Plan(start_time);

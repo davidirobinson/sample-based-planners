@@ -31,6 +31,45 @@ void print_usage(char **argv)
               << " -c <path-to-config> -m <path-to-map> [-v (visualize)]" << std::endl;
 }
 
+struct GeneralOptions
+{
+    PlannerType planner_type = PlannerType::RRTConnect;
+	ArmConfiguration start_config;
+	ArmConfiguration goal_config;
+	double arm_link_length;
+	double display_scale = 5.0;
+
+	GeneralOptions()
+	{
+	}
+
+    explicit GeneralOptions(const Json::Value &json)
+    {
+        std::string planner_type_str = json["planner"]["type"].asString();
+        std::transform(planner_type_str.begin(), planner_type_str.end(), planner_type_str.begin(),
+            [](unsigned char c){ return std::tolower(c); });
+        if (planner_type_str == "rrt")
+            planner_type = PlannerType::RRT;
+        else if (planner_type_str == "rrtconnect")
+            planner_type = PlannerType::RRTConnect;
+        else if (planner_type_str == "rrtstar")
+            planner_type = PlannerType::RRTStar;
+        else if (planner_type_str == "prm")
+            planner_type = PlannerType::PRM;
+        else
+            throw std::runtime_error(std::string("Unknown planner type: " + planner_type_str));
+
+		for (const auto &angle_json : json["general"]["arm_start_degrees"])
+			start_config.angles.emplace_back(angle_json.asDouble() / 180 * M_PI);
+
+		for (const auto &angle_json : json["general"]["arm_end_degrees"])
+			goal_config.angles.emplace_back(angle_json.asDouble() / 180 * M_PI);
+
+		arm_link_length = json["general"]["arm_link_length"].asDouble();
+		display_scale = json["general"]["image_display_scale"].asDouble();
+    }
+};
+
 Json::Value read_json(const std::string &path)
 {
     std::ifstream ifs(path);
@@ -76,7 +115,11 @@ Map load_map(const std::string &map_path)
     return Map{ image_uchar, static_cast<size_t>(image_uchar.cols), static_cast<size_t>(image_uchar.rows), data };
 }
 
-cv::Mat draw_configs(cv::Mat map_image, const std::vector<ArmConfiguration> &configs, const double arm_link_length, const double scale)
+cv::Mat draw_configs(
+    cv::Mat map_image,
+    const std::vector<ArmConfiguration> &configs,
+    const double arm_link_length,
+    const double scale)
 {
     cv::resize(map_image, map_image, cv::Size(), scale, scale, cv::INTER_NEAREST);
     cv::cvtColor(map_image, map_image, CV_GRAY2RGB);
@@ -133,24 +176,15 @@ int main(int argc, char *argv[])
 
     const auto map = load_map(map_path);
     const auto config_json = read_json(config_path);
-    const auto opts = PlannerOptions(config_json);
+    const auto opts = GeneralOptions(config_json);
 
-    std::cout << "Loaded " << map.data.size() << "x" << map.data.at(0).size() << " map." << std::endl;
-    std::cout << "Loaded " << opts.arm_dof << " dof arm." << std::endl;
+    std::cout << "Loaded " << map.size_x << "x" << map.size_y << " map." << std::endl;
     std::cout << "Start angles (degrees): " << opts.start_config << std::endl;
     std::cout << "End angles (degrees): " << opts.goal_config << std::endl;
 
-    // Check start and end to ensure there's no collisions
-    const auto valid_start_and_end = IsValidArmConfiguration(opts.start_config, map) &&
-                                     IsValidArmConfiguration(opts.goal_config, map);
-
-    if (!valid_start_and_end)
-        std::cerr << std::endl << "Start or end config is invalid with this map..." << std::endl;
-
     if (visualize)
     {
-        if (valid_start_and_end)
-            std::cout << std::endl << "Press any key to begin planning..." << std::endl;
+        std::cout << std::endl << "Press any key to begin planning..." << std::endl;
 
         const auto configs = std::vector<ArmConfiguration>{ opts.start_config, opts.goal_config };
         cv::imshow("Map", draw_configs(map.image, configs, opts.arm_link_length, opts.display_scale));
@@ -158,24 +192,21 @@ int main(int argc, char *argv[])
         cv::destroyAllWindows();
     }
 
-    if (!valid_start_and_end)
-        std::exit(EXIT_FAILURE);
-
     // Choose planner
     std::unique_ptr<Planner> planner;
     switch (opts.planner_type)
     {
         case PlannerType::RRT:
-            planner = std::make_unique<RRT>(RRT(opts, map, opts.start_config, opts.goal_config));
+            planner = std::make_unique<RRT>(RRT(PlannerOptions(config_json), map, opts.start_config, opts.goal_config, opts.arm_link_length));
             break;
         case PlannerType::RRTConnect:
-            planner = std::make_unique<RRTConnect>(RRTConnect(opts, map, opts.start_config, opts.goal_config));
+            planner = std::make_unique<RRTConnect>(RRTConnect(PlannerOptions(config_json), map, opts.start_config, opts.goal_config, opts.arm_link_length));
             break;
         case PlannerType::RRTStar:
-            planner = std::make_unique<RRTStar>(RRTStar(opts, map, opts.start_config, opts.goal_config));
+            planner = std::make_unique<RRTStar>(RRTStar(PlannerOptions(config_json), map, opts.start_config, opts.goal_config, opts.arm_link_length));
             break;
         case PlannerType::PRM:
-            planner = std::make_unique<PRM>(PRM(opts, map, opts.start_config, opts.goal_config));
+            planner = std::make_unique<PRM>(PRM(PlannerOptions(config_json), map, opts.start_config, opts.goal_config, opts.arm_link_length));
             break;
         default:
             throw std::runtime_error("Unsupported planner type");

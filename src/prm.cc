@@ -12,8 +12,9 @@ PRM::PRM(
     const PlannerOptions &opts,
     const Map &map,
     const ArmConfiguration &start_config,
-    const ArmConfiguration &goal_config) :
-    Planner(opts, map, start_config, goal_config)
+    const ArmConfiguration &goal_config,
+    const double arm_link_length) :
+    Planner(opts, map, start_config, goal_config, arm_link_length)
 {
 }
 
@@ -37,7 +38,7 @@ bool PRM::dijkstra(tree &T, ArmConfiguration start, ArmConfiguration goal)
     */
     int count (0);
     int curr;
-    while(!open_set.empty() && count < timeout)
+    while(!open_set.empty() && count < opts_.timeout_s)
     {
         /*
         * Get ArmConfiguration with lowest f value
@@ -166,7 +167,7 @@ Plan PRM::plan()
             {
                 break;
             }
-            else if (PRM_samples > timeout)
+            else if (PRM_samples > opts_.timeout_s)
             {
                 std::cerr << "Timeout" << std::endl;
                 return Plan(start_time);

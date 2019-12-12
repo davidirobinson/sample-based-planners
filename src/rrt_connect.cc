@@ -12,8 +12,9 @@ RRTConnect::RRTConnect(
     const PlannerOptions &opts,
     const Map &map,
     const ArmConfiguration &start_config,
-    const ArmConfiguration &goal_config) :
-    Planner(opts, map, start_config, goal_config)
+    const ArmConfiguration &goal_config,
+    const double arm_link_length) :
+    Planner(opts, map, start_config, goal_config, arm_link_length)
 {
 }
 
@@ -25,7 +26,7 @@ bool RRTConnect::connect(tree &T, const ArmConfiguration &new_config)
     std::vector<ArmConfiguration> extentions;
 
     int count(0);
-    while (count < timeout)
+    while (count < opts_.timeout_s)
     {
         ArmConfiguration extended_config = extend(to_extend, new_config);
 
@@ -92,7 +93,7 @@ Plan RRTConnect::plan()
         T_switch = !T_switch;
 
         count++;
-        if (count > timeout)
+        if (count > opts_.timeout_s)
         {
             std::cerr << "Timeout" << std::endl;
             return Plan(start_time);

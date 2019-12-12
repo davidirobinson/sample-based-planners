@@ -24,7 +24,8 @@ class RRTConnect : public Planner
 			const PlannerOptions &opts,
 			const Map &map,
 			const ArmConfiguration &start_config,
-			const ArmConfiguration &goal_config);
+			const ArmConfiguration &goal_config,
+			const double arm_link_length);
 
 		Plan plan();
 
