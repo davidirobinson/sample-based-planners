@@ -82,7 +82,6 @@ class Planner
 			const ArmConfiguration &goal_config,
 			const double arm_link_length);
 
-		// TODO: Rule of 5
 		Planner(Planner&& other);
 
 		virtual Plan plan() = 0;

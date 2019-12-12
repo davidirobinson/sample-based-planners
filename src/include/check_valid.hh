@@ -27,16 +27,14 @@ typedef struct {
 	int Flipped;
 } bresenham_param_t;
 
-const int LINKLENGTH_CELLS = 10;
-
 void ContXY2Cell(double x, double y, short unsigned int* pX, short unsigned int *pY, int x_size, int y_size);
 
 void get_bresenham_parameters(int p1x, int p1y, int p2x, int p2y, bresenham_param_t *params);
 
 void get_current_point(bresenham_param_t *params, int *x, int *y);
 
-int get_next_point(bresenham_param_t *params);
+bool get_next_point(bresenham_param_t *params);
 
 bool IsValidLineSegment(const double x0, const double y0, const double x1, const double y1, const Map &map);
 
-bool IsValidArmConfiguration(const ArmConfiguration &config, const Map &map);
+bool IsValidArmConfiguration(const ArmConfiguration &config, const Map &map, const double arm_link_length);

@@ -94,12 +94,11 @@ void get_current_point(bresenham_param_t *params, int *x, int *y)
 	}
 }
 
-int get_next_point(bresenham_param_t *params)
+bool get_next_point(bresenham_param_t *params)
 {
 	if (params->XIndex == params->X2)
-	{
-		return 0;
-	}
+		return false;
+
 	params->XIndex += params->Increment;
 
 	if (params->DTerm < 0 || (params->Increment < 0 && params->DTerm <= 0))
@@ -111,7 +110,7 @@ int get_next_point(bresenham_param_t *params)
 		params->DTerm += params->IncrNE;
 		params->YIndex += params->Increment;
 	}
-	return 1;
+	return true;
 }
 
 bool IsValidLineSegment(const double x0, const double y0, const double x1, const double y1, const Map &map)
@@ -126,7 +125,7 @@ bool IsValidLineSegment(const double x0, const double y0, const double x1, const
 	   y0 < 0 || y0 >= map.size_y ||
 	   y1 < 0 || y1 >= map.size_y)
 	{
-		return 0;
+		return false;
 	}
 
 	ContXY2Cell(x0, y0, &nX0, &nY0, map.size_x, map.size_y);
@@ -138,14 +137,14 @@ bool IsValidLineSegment(const double x0, const double y0, const double x1, const
 	{
 		get_current_point(&params, &nX, &nY);
 		if (map.data.at(nX).at(nY) == MapState::Occupied)
-		    return 0;
+		    return false;
 	}
 	while (get_next_point(&params));
 
-	return 1;
+	return true;
 }
 
-bool IsValidArmConfiguration(const ArmConfiguration &config, const Map &map)
+bool IsValidArmConfiguration(const ArmConfiguration &config, const Map &map, const double arm_link_length)
 {
  	// Iterate through all the links starting with the base
     double x0, y0, x1, y1;
@@ -156,8 +155,8 @@ bool IsValidArmConfiguration(const ArmConfiguration &config, const Map &map)
 		// Compute the corresponding line segment
 		x0 = x1;
 		y0 = y1;
-		x1 = x0 + LINKLENGTH_CELLS * cos(angle);
-		y1 = y0 + LINKLENGTH_CELLS * sin(angle);
+		x1 = x0 + arm_link_length * cos(angle);
+		y1 = y0 + arm_link_length * sin(angle);
 
 		// Check the validity of the corresponding line segment
 		if (!IsValidLineSegment(x0, y0, x1, y1, map))

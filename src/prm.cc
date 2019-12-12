@@ -131,7 +131,7 @@ Plan PRM::plan()
         // Uniform random sampling
         ArmConfiguration alpha = sample_config(0);
 
-        if (IsValidArmConfiguration(alpha, map_))
+        if (IsValidArmConfiguration(alpha, map_, arm_link_length_))
         {
             // Get neighbors
             auto Q = get_neighbors(PRM, alpha, PRM_thresh);
