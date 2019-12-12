@@ -43,7 +43,7 @@ bool RRTConnect::connect(tree &T, const ArmConfiguration &new_config)
             // Attach parent and add to tree
             extended_config.id = T.size() + extentions.size();
             extended_config.parent_id = to_extend.id;
-            extentions.push_back(extended_config);
+            extentions.emplace_back(extended_config);
 
             // Update current position
             to_extend = extended_config;

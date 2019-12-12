@@ -70,7 +70,7 @@ ArmConfiguration Planner::sample_config(const double &p_goal)
     ArmConfiguration random_config;
     random_config.angles.resize(goal_config_.angles.size());
 
-    for (int i = 0; i < goal_config_.angles.size(); i++)
+    for (size_t i = 0; i < goal_config_.angles.size(); i++)
         random_config.angles[i] = angle(random_);
 
     return random_config;
@@ -153,17 +153,14 @@ void Planner::generate_path(std::vector<ArmConfiguration> &plan, tree &T, ArmCon
     size_t count = 0;
     while (count < opts_.timeout_s)
     {
-        plan.push_back(parent);
-
-        if (parent.parent_id == -1)
-        {
-            break;
-        }
-        else
+        plan.emplace_back(parent);
+        if (parent.parent_id != -1)
         {
             parent = T[parent.parent_id];
             count++;
         }
+        else
+            break;
     }
 }
 
@@ -177,13 +174,13 @@ std::vector<int> Planner::get_neighbors(
     for (auto t : T)
     {
         double dist = config_dist(t.second, config);
-
         if (dist < radius &&
             config.parent_id != t.second.id &&
             config.id != t.second.id)
         {
-            neighbors.push_back(t.second.id);
+            neighbors.emplace_back(t.second.id);
         }
     }
+
     return neighbors;
 }

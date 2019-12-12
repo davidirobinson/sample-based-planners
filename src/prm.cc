@@ -22,30 +22,22 @@ bool PRM::dijkstra(tree &T, ArmConfiguration start, ArmConfiguration goal)
 {
     std::vector<ArmConfiguration> plan;
 
-    /*
-    * Setup Data Structures for Search
-    */
+    // Setup Data Structures for Search
     std::vector<int> open_set, closed_set;
-    open_set.push_back(start.id);
+    open_set.emplace_back(start.id);
 
-    /*
-    * Compute Cost for start cell
-    */
+    // Compute Cost for start cell
     T[start.id].cost = 0;
 
-    /*
-    * Begin main search loop
-    */
+    // Begin main search loop
     int count (0);
     int curr;
     while(!open_set.empty() && count < opts_.timeout_s)
     {
-        /*
-        * Get ArmConfiguration with lowest f value
-        */
+        // Get ArmConfiguration with lowest f value
         float min_f = 1e99;
         int min_idx = 0;
-        for (int i=0; i<open_set.size(); i++)
+        for (size_t i = 0; i < open_set.size(); i++)
         {
             float comp_f = T[open_set[i]].cost;
             if (comp_f < min_f)
@@ -56,57 +48,41 @@ bool PRM::dijkstra(tree &T, ArmConfiguration start, ArmConfiguration goal)
         }
         curr = open_set[min_idx];
 
-        /*
-        * Check if we're at the goal and return final path
-        */
+        // Check if we're at the goal and return final path
         if (T[curr] == goal) return true;
 
-        /*
-        * Deal with sets
-        */
+        // Deal with sets
         open_set.erase(open_set.begin() + min_idx);
-        closed_set.push_back(curr);
+        closed_set.emplace_back(curr);
 
-        /*
-        * Search through neighbours
-        */
+        // Search through neighbours
         for (auto edge : T[curr].edges)
         {
-            /*
-            * See if the neighbor is in the closed set
-            */
+            // See if the neighbor is in the closed set
             if(std::find(closed_set.begin(), closed_set.end(), edge) != closed_set.end())
             {
                 continue;
             }
 
-            /*
-            * Compute new G-Value and cost
-            */
+            // Compute new G-Value and cost
             int cost = config_dist(T[curr], T[edge]);
             if (cost >= 0)
             {
-                /*
-                * Compute cost to come
-                */
+                // Compute cost to come
                 float cost_to_come = T[curr].cost + cost;
 
-                /*
-                * Add to open set if it's not,
-                * Otherwise just skip this neighbor because it's not a better path
-                */
+                // Add to open set if it's not,
+                // Otherwise just skip this neighbor because it's not a better path
                 if( std::find(open_set.begin(), open_set.end(), edge) == open_set.end() )
                 {
-                    open_set.push_back(edge);
+                    open_set.emplace_back(edge);
                 }
                 else if(cost_to_come >= T[edge].cost)
                 {
                     continue;
                 }
 
-                /*
-                * This is the best path yet, Let's add it to the Open Set!
-                */
+                // This is the best path yet, Let's add it to the Open Set!
                 T[edge].parent_id = curr;
                 T[edge].cost = cost_to_come;
             }
@@ -144,8 +120,8 @@ Plan PRM::plan()
             {
                 if (no_collisions(PRM[q], PRM[alpha.id]))
                 {
-                    PRM[alpha.id].edges.push_back(q);
-                    PRM[q].edges.push_back(alpha.id);
+                    PRM[alpha.id].edges.emplace_back(q);
+                    PRM[q].edges.emplace_back(alpha.id);
                 }
             }
 
@@ -186,9 +162,9 @@ Plan PRM::plan()
         return Plan(start_time);
     }
 
-    plan.push_back(goal_config_);
+    plan.emplace_back(goal_config_);
     generate_path(plan, PRM, PRM[PRM_goal_config.id]);
-    plan.push_back(start_config_);
+    plan.emplace_back(start_config_);
     std::reverse(plan.begin(), plan.end());
     return Plan(plan, start_time);
 }
