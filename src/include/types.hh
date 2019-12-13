@@ -40,8 +40,8 @@ enum class PlannerUnits
 
 struct ArmConfiguration
 {
-	int id;
-	int parent_id;
+	size_t id;
+	size_t parent_id;
 	std::vector<double> angles;
 
 	// For PRM

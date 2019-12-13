@@ -25,8 +25,8 @@ bool RRTConnect::connect(tree &T, const ArmConfiguration &new_config)
 
     std::vector<ArmConfiguration> extentions;
 
-    int count(0);
-    while (count < opts_.timeout_s)
+    const auto start_time = std::chrono::steady_clock::now();
+    while ((std::chrono::steady_clock::now() - start_time).count() / 1e9 < opts_.timeout_s)
     {
         ArmConfiguration extended_config = extend(to_extend, new_config);
 
@@ -36,7 +36,8 @@ bool RRTConnect::connect(tree &T, const ArmConfiguration &new_config)
             if (extended_config == new_config)
             {
                 // Add to real tree
-                for (auto e : extentions) T[e.id] = e;
+                for (const auto &e : extentions)
+                    T[e.id] = e;
                 return true;
             }
 
@@ -51,11 +52,13 @@ bool RRTConnect::connect(tree &T, const ArmConfiguration &new_config)
         else
         {
             // Add to real tree because apparently we should
-            for (auto e : extentions) T[e.id] = e;
+            for (const auto &e : extentions)
+                T[e.id] = e;
+
             return false;
         }
-        count++;
     }
+
     return false;
 }
 
@@ -73,31 +76,24 @@ Plan RRTConnect::plan()
     ArmConfiguration T_start_end, T_goal_end, extended_config;
 
     bool T_switch(true);
-    int count(0);
     while (true)
     {
         if (T_switch)
         {
             if (generate_RRT_tree(T_start, goal_config_, extended_config))
-            {
-                if (connect(T_goal, extended_config)) break;
-            }
+                if (connect(T_goal, extended_config))
+                    break;
         }
         else
         {
             if (generate_RRT_tree(T_goal, start_config_, extended_config))
-            {
-                if (connect(T_start, extended_config)) break;
-            }
+                if (connect(T_start, extended_config))
+                    break;
         }
         T_switch = !T_switch;
 
-        count++;
-        if (count > opts_.timeout_s)
-        {
-            std::cerr << "Timeout" << std::endl;
+        if ((std::chrono::steady_clock::now() - start_time).count() / 1e9 > opts_.timeout_s)
             return Plan(start_time);
-        }
     }
 
     /************* Return Path *************/

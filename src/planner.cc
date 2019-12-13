@@ -91,6 +91,7 @@ ArmConfiguration Planner::get_nearest_neighbor(
             nearest = c.second;
         }
     }
+
     return nearest;
 }
 
@@ -143,22 +144,21 @@ bool Planner::generate_RRT_tree(
         extended_config.id = T_start.size();
         extended_config.parent_id = nearest_config.id;
         T_start[extended_config.id] = extended_config;
+
         return true;
     }
+
     return false;
 }
 
 void Planner::generate_path(std::vector<ArmConfiguration> &plan, tree &T, ArmConfiguration parent)
 {
-    size_t count = 0;
-    while (count < opts_.timeout_s)
+    const auto start_time = std::chrono::steady_clock::now();
+    while ((std::chrono::steady_clock::now() - start_time).count() / 1e9 < opts_.timeout_s)
     {
         plan.emplace_back(parent);
         if (parent.parent_id != -1)
-        {
             parent = T[parent.parent_id];
-            count++;
-        }
         else
             break;
     }

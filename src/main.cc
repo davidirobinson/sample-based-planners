@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
 
     if (!plan.valid)
     {
-        std::cout << std::endl << "Planner failed." << plan.duration.count() << " seconds" << std::endl;
+        std::cout << std::endl << "Planner failed / timed out in " << plan.duration.count() << " seconds" << std::endl;
         std::exit(EXIT_FAILURE);
     }
 

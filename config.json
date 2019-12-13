@@ -15,7 +15,7 @@
     "planner":
     {
         "type": "rrtconnect",
-        "timeout_s": 200000,
+        "timeout_s": 60,
         "interp_samples": 50,
         "angle_step_size": 0.5,
         "p_goal_sample": 0.05

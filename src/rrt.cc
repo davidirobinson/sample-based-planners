@@ -29,7 +29,6 @@ Plan RRT::plan()
     T_start[start_config_.id] = start_config_;
 
     double goal_dist = config_dist(start_config_, goal_config_);
-    int count(0);
     while (true)
     {
         ArmConfiguration extended_config;
@@ -51,12 +50,8 @@ Plan RRT::plan()
             }
         }
 
-        if (count > opts_.timeout_s)
-        {
-            std::cerr << "Timeout" << std::endl;
+        if ((std::chrono::steady_clock::now() - start_time).count() / 1e9 > opts_.timeout_s)
             return Plan(start_time);
-        }
-        count++;
     }
 
     /************* Return Path *************/
@@ -64,5 +59,6 @@ Plan RRT::plan()
     std::vector<ArmConfiguration> plan;
     generate_path(plan, T_start, goal_config_);
     std::reverse(plan.begin(), plan.end());
+
     return Plan(plan, start_time);
 }

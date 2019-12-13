@@ -29,7 +29,6 @@ Plan RRTStar::plan()
     T[start_config_.id] = start_config_;
 
     double goal_dist = config_dist(start_config_, goal_config_);
-    int count(0);
     while (true)
     {
         ArmConfiguration x_new;
@@ -57,10 +56,8 @@ Plan RRTStar::plan()
                     generate_path(path, T, T[x_near]);
 
                     double new_cost = config_dist(x_new, T[x_near]);
-                    for(int i=1; i<path.size(); i++)
-                    {
+                    for(size_t i = 1; i < path.size(); i++)
                         new_cost += config_dist(path[i-1],path[i]);
-                    }
 
                     if (new_cost < current_cost)
                     {
@@ -72,19 +69,12 @@ Plan RRTStar::plan()
 
             // Check the distance to the goal as a status update
             goal_dist = config_dist(get_nearest_neighbor(T, goal_config_), goal_config_);
-
             if (goal_dist < opts_.angle_step_size)
-            {
                 break;
-            }
         }
 
-        if (count > timeout) // lower timeout
-        {
-            std::cerr << "Timeout" << std::endl;
+        if ((std::chrono::steady_clock::now() - start_time).count() / 1e9 > opts_.timeout_s)
             return Plan(start_time);
-        }
-        count++;
     }
 
     /************* Return Path *************/
@@ -100,5 +90,6 @@ Plan RRTStar::plan()
     std::vector<ArmConfiguration> plan;
     generate_path(plan, T, goal_config_);
     std::reverse(plan.begin(), plan.end());
+
     return Plan(plan, start_time);
 }

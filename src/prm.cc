@@ -23,23 +23,23 @@ bool PRM::dijkstra(tree &T, ArmConfiguration start, ArmConfiguration goal)
     std::vector<ArmConfiguration> plan;
 
     // Setup Data Structures for Search
-    std::vector<int> open_set, closed_set;
+    std::vector<size_t> open_set, closed_set;
     open_set.emplace_back(start.id);
 
     // Compute Cost for start cell
-    T[start.id].cost = 0;
+    T[start.id].cost = 0.0;
 
     // Begin main search loop
-    int count (0);
-    int curr;
-    while(!open_set.empty() && count < opts_.timeout_s)
+    size_t curr;
+    const auto start_time = std::chrono::steady_clock::now();
+    while(!open_set.empty() && (std::chrono::steady_clock::now() - start_time).count() / 1e9 < opts_.timeout_s)
     {
         // Get ArmConfiguration with lowest f value
         float min_f = 1e99;
         int min_idx = 0;
         for (size_t i = 0; i < open_set.size(); i++)
         {
-            float comp_f = T[open_set[i]].cost;
+            const auto comp_f = T[open_set[i]].cost;
             if (comp_f < min_f)
             {
                 min_f = comp_f;
@@ -49,14 +49,15 @@ bool PRM::dijkstra(tree &T, ArmConfiguration start, ArmConfiguration goal)
         curr = open_set[min_idx];
 
         // Check if we're at the goal and return final path
-        if (T[curr] == goal) return true;
+        if (T[curr] == goal)
+            return true;
 
         // Deal with sets
         open_set.erase(open_set.begin() + min_idx);
         closed_set.emplace_back(curr);
 
         // Search through neighbours
-        for (auto edge : T[curr].edges)
+        for (const auto &edge : T[curr].edges)
         {
             // See if the neighbor is in the closed set
             if(std::find(closed_set.begin(), closed_set.end(), edge) != closed_set.end())
@@ -65,30 +66,26 @@ bool PRM::dijkstra(tree &T, ArmConfiguration start, ArmConfiguration goal)
             }
 
             // Compute new G-Value and cost
-            int cost = config_dist(T[curr], T[edge]);
+            const auto cost = config_dist(T[curr], T[edge]);
             if (cost >= 0)
             {
                 // Compute cost to come
-                float cost_to_come = T[curr].cost + cost;
+                const auto cost_to_come = T[curr].cost + cost;
 
-                // Add to open set if it's not,
-                // Otherwise just skip this neighbor because it's not a better path
-                if( std::find(open_set.begin(), open_set.end(), edge) == open_set.end() )
-                {
+                // Add to open set if it's not, otherwise just skip this neighbor because
+                // it's not a better path
+                if (std::find(open_set.begin(), open_set.end(), edge) == open_set.end())
                     open_set.emplace_back(edge);
-                }
                 else if(cost_to_come >= T[edge].cost)
-                {
                     continue;
-                }
 
                 // This is the best path yet, Let's add it to the Open Set!
                 T[edge].parent_id = curr;
                 T[edge].cost = cost_to_come;
             }
         }
-        count++;
     }
+
     return false;
 }
 
@@ -138,17 +135,11 @@ Plan PRM::plan()
 
         // Nested exit condition
         if (PRM_samples > num_PRM_samples)
-        {
             if (valid_start_goal_connections)
-            {
                 break;
-            }
-            else if (PRM_samples > opts_.timeout_s)
-            {
-                std::cerr << "Timeout" << std::endl;
-                return Plan(start_time);
-            }
-        }
+
+        if ((std::chrono::steady_clock::now() - start_time).count() / 1e9 > opts_.timeout_s)
+            return Plan(start_time);
     }
 
     std::cout << "Finished Building PRM" << std::endl;
@@ -166,5 +157,6 @@ Plan PRM::plan()
     generate_path(plan, PRM, PRM[PRM_goal_config.id]);
     plan.emplace_back(start_config_);
     std::reverse(plan.begin(), plan.end());
+
     return Plan(plan, start_time);
 }

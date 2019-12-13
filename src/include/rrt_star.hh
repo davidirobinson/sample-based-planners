@@ -30,6 +30,5 @@ class RRTStar : public Planner
 		Plan plan();
 
 	private:
-		const long timeout = 50000; // lower than the rest!
 		const double rewire_radius = 0.5;
 };
