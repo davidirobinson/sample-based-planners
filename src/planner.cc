@@ -47,8 +47,8 @@ Planner::Planner(
     if (arm_dof < 2)
         throw std::runtime_error("invalid dofs: " + std::to_string(arm_dof) + ", it should be at least 2");
 
-    const auto valid_start_and_end = IsValidArmConfiguration(start_config_, map_, arm_link_length_) &&
-                                     IsValidArmConfiguration(goal_config_, map_, arm_link_length_);
+    const auto valid_start_and_end = is_valid_arm_config(start_config_, map_, arm_link_length_) &&
+                                     is_valid_arm_config(goal_config_, map_, arm_link_length_);
     if (!valid_start_and_end)
         throw std::runtime_error("Start or end config is invalid with this map...");
 }
@@ -130,7 +130,7 @@ bool Planner::no_collisions(ArmConfiguration start_config, ArmConfiguration goal
         for (size_t i = 0; i < interp.angles.size(); i++)
             interp.angles[i] = (1 - u) * start_config.angles[i] + u * goal_config.angles[i];
 
-        if (!IsValidArmConfiguration(interp, map_, arm_link_length_))
+        if (!is_valid_arm_config(interp, map_, arm_link_length_))
             return false;
     }
     return true;
