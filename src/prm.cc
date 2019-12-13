@@ -18,7 +18,7 @@ PRM::PRM(
 {
 }
 
-bool PRM::dijkstra(tree &T, ArmConfiguration start, ArmConfiguration goal)
+bool PRM::dijkstra(Tree &T, ArmConfiguration start, ArmConfiguration goal)
 {
     std::vector<ArmConfiguration> plan;
 
@@ -95,7 +95,7 @@ Plan PRM::plan()
 
     /************* Generate PRM *************/
 
-    tree PRM;
+    Tree PRM;
     ArmConfiguration PRM_start_config, PRM_goal_config;
     bool valid_start_goal_connections = false;
     int PRM_samples(0);
@@ -149,7 +149,7 @@ Plan PRM::plan()
     std::vector<ArmConfiguration> plan;
     if (!dijkstra(PRM, PRM_start_config, PRM_goal_config))
     {
-        std::cout << "Invalid Graph" << std::endl;
+        std::cerr << "Invalid Graph" << std::endl;
         return Plan(start_time);
     }
 

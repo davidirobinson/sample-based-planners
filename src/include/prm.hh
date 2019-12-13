@@ -33,5 +33,5 @@ class PRM : public Planner
 		const double PRM_thresh = 1.5;
 		const int num_PRM_samples = 4000;
 
-		bool dijkstra(tree &T, ArmConfiguration start, ArmConfiguration goal);
+		bool dijkstra(Tree &T, ArmConfiguration start, ArmConfiguration goal);
 };

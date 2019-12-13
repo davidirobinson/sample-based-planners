@@ -18,7 +18,7 @@ RRTConnect::RRTConnect(
 {
 }
 
-bool RRTConnect::connect(tree &T, const ArmConfiguration &new_config)
+bool RRTConnect::connect(Tree &T, const ArmConfiguration &new_config)
 {
     ArmConfiguration nearest_config = get_nearest_neighbor(T, new_config);
     ArmConfiguration to_extend = nearest_config;
@@ -69,7 +69,7 @@ Plan RRTConnect::plan()
     /************* Generate RRT-Connect *************/
 
     // Setup graph
-    tree T_start, T_goal;
+    Tree T_start, T_goal;
     T_start[start_config_.id] = start_config_;
     T_goal[goal_config_.id] = goal_config_;
 

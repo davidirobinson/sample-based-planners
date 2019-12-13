@@ -89,24 +89,24 @@ class Planner
 	protected:
 		ArmConfiguration sample_config(const double &p_goal);
 
-		ArmConfiguration get_nearest_neighbor(const tree &configs, const ArmConfiguration &new_config);
+		ArmConfiguration get_nearest_neighbor(const Tree &configs, const ArmConfiguration &new_config);
 
 		ArmConfiguration extend(const ArmConfiguration &nearest, const ArmConfiguration &sampled);
 
 		bool no_collisions(ArmConfiguration start_config, ArmConfiguration goal_config);
 
 		bool generate_RRT_tree(
-			tree &T_start,
+			Tree &T_start,
 			const ArmConfiguration &goal_config,
 			ArmConfiguration &extended_config);
 
 		void generate_path(
 			std::vector<ArmConfiguration> &plan,
-			tree &T,
+			Tree &T,
 			ArmConfiguration parent);
 
-		std::vector<int> get_neighbors(
-			const tree &T,
+		std::vector<size_t> get_neighbors(
+			const Tree &T,
 			const ArmConfiguration &config,
 			const double &radius);
 

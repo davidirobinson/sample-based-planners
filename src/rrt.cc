@@ -25,7 +25,7 @@ Plan RRT::plan()
     /************* Generate RRT *************/
 
     // Setup graph
-    tree T_start;
+    Tree T_start;
     T_start[start_config_.id] = start_config_;
 
     double goal_dist = config_dist(start_config_, goal_config_);

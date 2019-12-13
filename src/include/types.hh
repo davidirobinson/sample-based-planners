@@ -62,7 +62,7 @@ struct ArmConfiguration
 	}
 };
 
-using tree = std::unordered_map<size_t, ArmConfiguration>;
+using Tree = std::unordered_map<size_t, ArmConfiguration>;
 
 inline std::ostream &operator<<(std::ostream &stream, const ArmConfiguration &arm_config)
 {

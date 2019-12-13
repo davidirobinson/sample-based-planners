@@ -25,7 +25,7 @@ Plan RRTStar::plan()
     /************* Generate RRT Star *************/
 
     // Initialize Graph
-    tree T;
+    Tree T;
     T[start_config_.id] = start_config_;
 
     double goal_dist = config_dist(start_config_, goal_config_);

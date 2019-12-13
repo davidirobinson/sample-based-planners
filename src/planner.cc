@@ -77,7 +77,7 @@ ArmConfiguration Planner::sample_config(const double &p_goal)
 }
 
 ArmConfiguration Planner::get_nearest_neighbor(
-    const tree &configs,
+    const Tree &configs,
     const ArmConfiguration &new_config)
 {
     double min_dist = 1e9;
@@ -130,7 +130,7 @@ bool Planner::no_collisions(ArmConfiguration start_config, ArmConfiguration goal
 }
 
 bool Planner::generate_RRT_tree(
-    tree &T_start,
+    Tree &T_start,
     const ArmConfiguration &goal_config,
     ArmConfiguration &extended_config)
 {
@@ -151,7 +151,7 @@ bool Planner::generate_RRT_tree(
     return false;
 }
 
-void Planner::generate_path(std::vector<ArmConfiguration> &plan, tree &T, ArmConfiguration parent)
+void Planner::generate_path(std::vector<ArmConfiguration> &plan, Tree &T, ArmConfiguration parent)
 {
     const auto start_time = std::chrono::steady_clock::now();
     while ((std::chrono::steady_clock::now() - start_time).count() / 1e9 < opts_.timeout_s)
@@ -164,16 +164,16 @@ void Planner::generate_path(std::vector<ArmConfiguration> &plan, tree &T, ArmCon
     }
 }
 
-std::vector<int> Planner::get_neighbors(
-    const tree &T,
+std::vector<size_t> Planner::get_neighbors(
+    const Tree &T,
     const ArmConfiguration &config,
     const double &radius)
 {
-    std::vector<int> neighbors;
+    std::vector<size_t> neighbors;
 
-    for (auto t : T)
+    for (const auto &t : T)
     {
-        double dist = config_dist(t.second, config);
+        const auto dist = config_dist(t.second, config);
         if (dist < radius &&
             config.parent_id != t.second.id &&
             config.id != t.second.id)
