@@ -43,8 +43,6 @@ struct ArmConfiguration
 	size_t id;
 	size_t parent_id;
 	std::vector<double> angles;
-
-	// For PRM
 	double cost;
 	std::vector<int> edges;
 

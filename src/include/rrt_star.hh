@@ -12,8 +12,11 @@
 
 struct RRTStarOptions
 {
+	PlannerOptions general;
+
     explicit RRTStarOptions(const Json::Value &json)
     {
+		general = PlannerOptions(json);
     }
 };
 
@@ -21,7 +24,7 @@ class RRTStar : public Planner
 {
 	public:
 		RRTStar(
-			const PlannerOptions &opts,
+			const RRTStarOptions &opts,
 			const Map &map,
 			const ArmConfiguration &start_config,
 			const ArmConfiguration &goal_config,

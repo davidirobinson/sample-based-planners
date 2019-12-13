@@ -9,12 +9,12 @@
 
 
 RRTStar::RRTStar(
-    const PlannerOptions &opts,
+    const RRTStarOptions &opts,
     const Map &map,
     const ArmConfiguration &start_config,
     const ArmConfiguration &goal_config,
     const double arm_link_length) :
-    Planner(opts, map, start_config, goal_config, arm_link_length)
+    Planner(opts.general, map, start_config, goal_config, arm_link_length)
 {
 }
 

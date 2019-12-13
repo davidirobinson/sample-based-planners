@@ -12,8 +12,11 @@
 
 struct PRMOptions
 {
+	PlannerOptions general;
+
     explicit PRMOptions(const Json::Value &json)
     {
+		general = PlannerOptions(json);
     }
 };
 
@@ -21,7 +24,7 @@ class PRM : public Planner
 {
 	public:
 		PRM(
-			const PlannerOptions &opts,
+			const PRMOptions &opts,
 			const Map &map,
 			const ArmConfiguration &start_config,
 			const ArmConfiguration &goal_config,

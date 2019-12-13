@@ -12,8 +12,11 @@
 
 struct RRTConnectOptions
 {
+	PlannerOptions general;
+
     explicit RRTConnectOptions(const Json::Value &json)
     {
+		general = PlannerOptions(json);
     }
 };
 
@@ -21,7 +24,7 @@ class RRTConnect : public Planner
 {
 	public:
 		RRTConnect(
-			const PlannerOptions &opts,
+			const RRTConnectOptions &opts,
 			const Map &map,
 			const ArmConfiguration &start_config,
 			const ArmConfiguration &goal_config,

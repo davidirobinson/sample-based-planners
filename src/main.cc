@@ -197,16 +197,20 @@ int main(int argc, char *argv[])
     switch (opts.planner_type)
     {
         case PlannerType::RRT:
-            planner = std::make_unique<RRT>(RRT(PlannerOptions(config_json), map, opts.start_config, opts.goal_config, opts.arm_link_length));
+            planner = std::make_unique<RRT>(RRT(
+                RRTOptions(config_json), map, opts.start_config, opts.goal_config, opts.arm_link_length));
             break;
         case PlannerType::RRTConnect:
-            planner = std::make_unique<RRTConnect>(RRTConnect(PlannerOptions(config_json), map, opts.start_config, opts.goal_config, opts.arm_link_length));
+            planner = std::make_unique<RRTConnect>(RRTConnect(
+                RRTConnectOptions(config_json), map, opts.start_config, opts.goal_config, opts.arm_link_length));
             break;
         case PlannerType::RRTStar:
-            planner = std::make_unique<RRTStar>(RRTStar(PlannerOptions(config_json), map, opts.start_config, opts.goal_config, opts.arm_link_length));
+            planner = std::make_unique<RRTStar>(RRTStar(
+                RRTStarOptions(config_json), map, opts.start_config, opts.goal_config, opts.arm_link_length));
             break;
         case PlannerType::PRM:
-            planner = std::make_unique<PRM>(PRM(PlannerOptions(config_json), map, opts.start_config, opts.goal_config, opts.arm_link_length));
+            planner = std::make_unique<PRM>(PRM(
+                PRMOptions(config_json), map, opts.start_config, opts.goal_config, opts.arm_link_length));
             break;
         default:
             throw std::runtime_error("Unsupported planner type");
