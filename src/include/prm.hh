@@ -13,11 +13,15 @@
 struct PRMOptions
 {
 	PlannerOptions general;
+	double thresh = 1.5;
+	size_t num_samples = 4000;
 
     explicit PRMOptions(const Json::Value &json)
     {
 		general = PlannerOptions(json);
-    }
+		thresh = json["planner"]["prm"]["thresh"].asDouble();
+		num_samples = json["planner"]["prm"]["num_samples"].asUInt64();
+	}
 };
 
 class PRM : public Planner
@@ -33,8 +37,7 @@ class PRM : public Planner
 		Plan plan();
 
 	private:
-		const double PRM_thresh = 1.5;
-		const int num_PRM_samples = 4000;
-
 		bool dijkstra(Tree &T, ArmConfiguration start, ArmConfiguration goal);
+
+		const PRMOptions prm_opts_;
 };

@@ -31,4 +31,7 @@ class RRT : public Planner
 			const double arm_link_length);
 
 		Plan plan();
+
+	private:
+		const RRTOptions rrt_opts_;
 };

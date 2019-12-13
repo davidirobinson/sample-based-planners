@@ -13,10 +13,12 @@
 struct RRTStarOptions
 {
 	PlannerOptions general;
+	double rewire_radius = 0.5;
 
     explicit RRTStarOptions(const Json::Value &json)
     {
 		general = PlannerOptions(json);
+		rewire_radius = json["planner"]["rrtstar"]["rewire_radius"].asDouble();
     }
 };
 
@@ -33,5 +35,5 @@ class RRTStar : public Planner
 		Plan plan();
 
 	private:
-		const double rewire_radius = 0.5;
+		const RRTStarOptions rrtstar_opts_;
 };

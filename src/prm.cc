@@ -14,6 +14,7 @@ PRM::PRM(
     const ArmConfiguration &start_config,
     const ArmConfiguration &goal_config,
     const double arm_link_length) :
+    prm_opts_(opts),
     Planner(opts.general, map, start_config, goal_config, arm_link_length)
 {
 }
@@ -107,13 +108,13 @@ Plan PRM::plan()
         if (IsValidArmConfiguration(alpha, map_, arm_link_length_))
         {
             // Get neighbors
-            auto Q = get_neighbors(PRM, alpha, PRM_thresh);
+            const auto Q = get_neighbors(PRM, alpha, prm_opts_.thresh);
 
             // Add node / edges to PRM
             PRM_samples++;
             alpha.id = PRM.size();
             PRM[alpha.id] = alpha;
-            for (auto q : Q)
+            for (const auto &q : Q)
             {
                 if (no_collisions(PRM[q], PRM[alpha.id]))
                 {
@@ -134,7 +135,7 @@ Plan PRM::plan()
         }
 
         // Nested exit condition
-        if (PRM_samples > num_PRM_samples)
+        if (PRM_samples > prm_opts_.num_samples)
             if (valid_start_goal_connections)
                 break;
 
@@ -142,16 +143,11 @@ Plan PRM::plan()
             return Plan(start_time);
     }
 
-    std::cout << "Finished Building PRM" << std::endl;
-
     /************* Compute Path *************/
 
     std::vector<ArmConfiguration> plan;
     if (!dijkstra(PRM, PRM_start_config, PRM_goal_config))
-    {
-        std::cerr << "Invalid Graph" << std::endl;
         return Plan(start_time);
-    }
 
     plan.emplace_back(goal_config_);
     generate_path(plan, PRM, PRM[PRM_goal_config.id]);

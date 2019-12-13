@@ -12,14 +12,18 @@ double config_dist(const ArmConfiguration &a, const ArmConfiguration &b)
 {
     // www.codeproject.com/Articles/59789/Calculate-the-Real-Difference-Between-Two-Angles-K
     double ssd = 0.0;
+
     for (size_t i = 0; i < a.angles.size(); i++)
     {
         double diff = a.angles[i] - b.angles[i];
-        while (diff < -M_PI) diff += 2 * M_PI;
-        while (diff > +M_PI) diff -= 2 * M_PI;
+        while (diff < -M_PI)
+            diff += 2 * M_PI;
+        while (diff > +M_PI)
+            diff -= 2 * M_PI;
 
         ssd += pow(diff, 2);
     }
+
     return sqrt(ssd);
 }
 
@@ -80,15 +84,18 @@ ArmConfiguration Planner::get_nearest_neighbor(
     const Tree &configs,
     const ArmConfiguration &new_config)
 {
-    double min_dist = 1e9;
+    double min_dist = 0.0;
+    bool first_iteration = true;
+
     ArmConfiguration nearest;
-    for (auto c : configs)
+    for (const auto &c : configs)
     {
         double dist = config_dist(c.second, new_config);
-        if (dist < min_dist)
+        if (first_iteration || dist < min_dist)
         {
             min_dist = dist;
             nearest = c.second;
+            first_iteration = false;
         }
     }
 
@@ -98,13 +105,13 @@ ArmConfiguration Planner::get_nearest_neighbor(
 ArmConfiguration Planner::extend(const ArmConfiguration &nearest, const ArmConfiguration &sampled)
 {
     double dist = config_dist(nearest, sampled);
-    if (opts_.angle_step_size >= dist)
+    if (opts_.angle_step_size_rad >= dist)
         return sampled;
 
     ArmConfiguration interp;
     interp.angles.resize(nearest.angles.size());
 
-    double u = opts_.angle_step_size / dist;
+    double u = opts_.angle_step_size_rad / dist;
     for (size_t i = 0; i < interp.angles.size(); i++)
         interp.angles[i] = (1 - u) * nearest.angles[i] + u * sampled.angles[i];
 

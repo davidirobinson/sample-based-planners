@@ -14,6 +14,7 @@ RRTConnect::RRTConnect(
     const ArmConfiguration &start_config,
     const ArmConfiguration &goal_config,
     const double arm_link_length) :
+    rrtconnect_opts_(opts),
     Planner(opts.general, map, start_config, goal_config, arm_link_length)
 {
 }

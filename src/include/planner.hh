@@ -30,7 +30,7 @@ struct PlannerOptions
 {
 	double timeout_s = 30;
 	unsigned interp_samples = 50;
-	double angle_step_size = 0.5;
+	double angle_step_size_rad = 0.5;
 	double p_goal_sample = 0.05;
 
 	PlannerOptions()
@@ -41,7 +41,7 @@ struct PlannerOptions
     {
 		timeout_s = json["planner"]["timeout_s"].asDouble();
 		interp_samples = json["planner"]["interp_samples"].asUInt();
-		angle_step_size = json["planner"]["angle_step_size"].asDouble();
+		angle_step_size_rad = json["planner"]["angle_step_size_deg"].asDouble() / 180 * M_PI;
 		p_goal_sample = json["planner"]["p_goal_sample"].asDouble();
     }
 };

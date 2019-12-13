@@ -14,6 +14,7 @@ RRT::RRT(
     const ArmConfiguration &start_config,
     const ArmConfiguration &goal_config,
     const double arm_link_length) :
+    rrt_opts_(opts),
     Planner(opts.general, map, start_config, goal_config, arm_link_length)
 {
 }
@@ -38,7 +39,7 @@ Plan RRT::plan()
             ArmConfiguration nearest_to_goal = get_nearest_neighbor(T_start, goal_config_);
             goal_dist = config_dist(nearest_to_goal, goal_config_);
 
-            if (goal_dist < opts_.angle_step_size)
+            if (goal_dist < opts_.angle_step_size_rad)
             {
                 // Add goal to tree
                 goal_config_.id = T_start.size();
