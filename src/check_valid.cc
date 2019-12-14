@@ -12,80 +12,80 @@ void cont_xy_to_cell(const double x, const double y, short unsigned &pX, short u
 {
 	constexpr double cellsize = 1.0;
 
-	//take the nearest cell
+	// Take the nearest cell
 	pX = static_cast<int>(x / static_cast<double>(cellsize));
-	if(x < 0)
+	if (x < 0)
 		pX = 0;
-	if(pX >= x_size)
+	if (pX >= x_size)
 		pX = x_size - 1;
 
 	pY = static_cast<int>(y / static_cast<double>(cellsize));
-	if(y < 0)
+	if (y < 0)
 		pY = 0;
-	if(pY >= y_size)
+	if (pY >= y_size)
 		pY = y_size - 1;
 }
 
 void get_current_point(const BresenhamParams &params, int &x, int &y)
 {
-	if (params.UsingYIndex)
+	if (params.using_y_index)
 	{
-		y = params.XIndex;
-		x = params.YIndex;
-		if (params.Flipped)
+		y = params.x_index;
+		x = params.y_index;
+		if (params.flipped)
 			x = -x;
 	}
 	else
 	{
-		x = params.XIndex;
-		y = params.YIndex;
-		if (params.Flipped)
+		x = params.x_index;
+		y = params.y_index;
+		if (params.flipped)
 			y = -y;
 	}
 }
 
 bool get_next_point(BresenhamParams &params)
 {
-	if (params.XIndex == params.X2)
+	if (params.x_index == params.x2)
 		return false;
 
-	params.XIndex += params.Increment;
+	params.x_index += params.increment;
 
-	if (params.DTerm < 0 || (params.Increment < 0 && params.DTerm <= 0))
+	if (params.d_term < 0 || (params.increment < 0 && params.d_term <= 0))
 	{
-		params.DTerm += params.IncrE;
+		params.d_term += params.increment_e;
 	}
 	else
 	{
-		params.DTerm += params.IncrNE;
-		params.YIndex += params.Increment;
+		params.d_term += params.increment_ne;
+		params.y_index += params.increment;
 	}
 	return true;
 }
 
 bool is_valid_line_segment(const double x0, const double y0, const double x1, const double y1, const Map &map)
 {
-	int nX, nY;
-    short unsigned int nX0, nY0, nX1, nY1;
+	int nx, ny;
+    short unsigned nx0, ny0, nx1, ny1;
 
 	// Make sure the line segment is inside the map
-	if(x0 < 0 || x0 >= map.size_x ||
-	   x1 < 0 || x1 >= map.size_x ||
-	   y0 < 0 || y0 >= map.size_y ||
-	   y1 < 0 || y1 >= map.size_y)
+	if (x0 < 0 || x0 >= map.size_x ||
+	    x1 < 0 || x1 >= map.size_x ||
+	    y0 < 0 || y0 >= map.size_y ||
+	    y1 < 0 || y1 >= map.size_y)
 	{
 		return false;
 	}
 
-	cont_xy_to_cell(x0, y0, nX0, nY0, map.size_x, map.size_y);
-	cont_xy_to_cell(x1, y1, nX1, nY1, map.size_x, map.size_y);
+	cont_xy_to_cell(x0, y0, nx0, ny0, map.size_x, map.size_y);
+	cont_xy_to_cell(x1, y1, nx1, ny1, map.size_x, map.size_y);
 
 	// Iterate through the points on the segment
-	BresenhamParams params(nX0, nY0, nX1, nY1);
+	BresenhamParams params(nx0, ny0, nx1, ny1);
 	do
 	{
-		get_current_point(params, nX, nY);
-		if (map.data.at(nX).at(nY) == MapState::Occupied)
+		get_current_point(params, nx, ny);
+		if (map.data.at(nx).at(ny) == MapState::Occupied)
 		    return false;
 	}
 	while (get_next_point(params));
@@ -96,8 +96,7 @@ bool is_valid_line_segment(const double x0, const double y0, const double x1, co
 bool is_valid_arm_config(const ArmConfiguration &config, const Map &map, const double arm_link_length)
 {
  	// Iterate through all the links starting with the base
-    double x0, y0, x1, y1;
-	x1 = y1 = 0;
+    double x0, y0, x1(0), y1(0);
 
 	for (const auto &angle : config.angles)
 	{

@@ -17,59 +17,59 @@
 
 struct BresenhamParams
 {
-	int X1, Y1;
-	int X2, Y2;
-	int Increment;
-	int UsingYIndex;
-	int DeltaX, DeltaY;
-	int DTerm;
-	int IncrE, IncrNE;
-	int XIndex, YIndex;
-	int Flipped;
+	int x1, y1;
+	int x2, y2;
+	int increment;
+	int using_y_index;
+	int delta_x, delta_y;
+	int d_term;
+	int increment_e, increment_ne;
+	int x_index, y_index;
+	int flipped;
 
 	BresenhamParams(int p1x, int p1y, int p2x, int p2y)
 	{
-		UsingYIndex = 0;
+		using_y_index = 0;
 
 		if (fabs(static_cast<double>(p2y - p1y) / static_cast<double>(p2x - p1x)) > 1)
-			UsingYIndex++;
+			using_y_index++;
 
-		if (UsingYIndex)
+		if (using_y_index)
 		{
-			Y1 = p1x;
-			X1 = p1y;
-			Y2 = p2x;
-			X2 = p2y;
+			y1 = p1x;
+			x1 = p1y;
+			y2 = p2x;
+			x2 = p2y;
 		}
 		else
 		{
-			X1 = p1x;
-			Y1 = p1y;
-			X2 = p2x;
-			Y2 = p2y;
+			x1 = p1x;
+			y1 = p1y;
+			x2 = p2x;
+			y2 = p2y;
 		}
 
 		if ((p2x - p1x) * (p2y - p1y) < 0)
 		{
-			Flipped = 1;
-			Y1 = -Y1;
-			Y2 = -Y2;
+			flipped = 1;
+			y1 = -y1;
+			y2 = -y2;
 		}
 		else
-			Flipped = 0;
+			flipped = 0;
 
-		if (X2 > X1)
-			Increment = 1;
+		if (x2 > x1)
+			increment = 1;
 		else
-			Increment = -1;
+			increment = -1;
 
-		DeltaX = X2 - X1;
-		DeltaY = Y2 - Y1;
-		IncrE = 2 * DeltaY * Increment;
-		IncrNE = 2 * (DeltaY - DeltaX) * Increment;
-		DTerm = (2 * DeltaY - DeltaX) * Increment;
-		XIndex = X1;
-		YIndex = Y1;
+		delta_x = x2 - x1;
+		delta_y = y2 - y1;
+		increment_e = 2 * delta_y * increment;
+		increment_ne = 2 * (delta_y - delta_x) * increment;
+		d_term = (2 * delta_y - delta_x) * increment;
+		x_index = x1;
+		y_index = y1;
 	}
 
 

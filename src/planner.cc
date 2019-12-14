@@ -90,7 +90,7 @@ ArmConfiguration Planner::get_nearest_neighbor(
     ArmConfiguration nearest;
     for (const auto &c : configs)
     {
-        double dist = config_dist(c.second, new_config);
+        const auto dist = config_dist(c.second, new_config);
         if (first_iteration || dist < min_dist)
         {
             min_dist = dist;
@@ -104,14 +104,14 @@ ArmConfiguration Planner::get_nearest_neighbor(
 
 ArmConfiguration Planner::extend(const ArmConfiguration &nearest, const ArmConfiguration &sampled)
 {
-    double dist = config_dist(nearest, sampled);
+    const auto dist = config_dist(nearest, sampled);
     if (opts_.angle_step_size_rad >= dist)
         return sampled;
 
     ArmConfiguration interp;
     interp.angles.resize(nearest.angles.size());
 
-    double u = opts_.angle_step_size_rad / dist;
+    const auto u = opts_.angle_step_size_rad / dist;
     for (size_t i = 0; i < interp.angles.size(); i++)
         interp.angles[i] = (1 - u) * nearest.angles[i] + u * sampled.angles[i];
 
@@ -122,7 +122,7 @@ bool Planner::no_collisions(ArmConfiguration start_config, ArmConfiguration goal
 {
     for (double i = 0; i <= opts_.interp_samples; i += 1.0)
     {
-        double u = i / opts_.interp_samples;
+        const auto u = i / opts_.interp_samples;
 
         ArmConfiguration interp;
         interp.angles.resize(start_config.angles.size());

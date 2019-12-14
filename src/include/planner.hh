@@ -24,8 +24,6 @@
 #include <json/json.h>
 
 
-double config_dist(const ArmConfiguration &a, const ArmConfiguration &b);
-
 struct PlannerOptions
 {
 	double timeout_s = 30;
@@ -45,6 +43,14 @@ struct PlannerOptions
 		p_goal_sample = json["planner"]["p_goal_sample"].asDouble();
     }
 };
+
+/**
+ * Compute the angular distance between each link of the arm configuration
+ * @param a First arm configuration
+ * @param b Second arm configuration
+ * @return Total angular distance between arms
+ */
+double config_dist(const ArmConfiguration &a, const ArmConfiguration &b);
 
 struct Plan
 {
