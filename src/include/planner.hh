@@ -81,6 +81,14 @@ struct Plan
 class Planner
 {
 	public:
+		/**
+		 * Constructor
+		 * @param opts General options for the planner
+		 * @param map Map to plan within
+		 * @param start_config Initial arm configuration
+ 		 * @param end_config Final arm configuration
+	     * @param arm_link_length Length of the arm to planning for
+		 */
 		Planner(
 			const PlannerOptions &opts,
 			const Map &map,
@@ -88,18 +96,32 @@ class Planner
 			const ArmConfiguration &goal_config,
 			const double arm_link_length);
 
+		// TODO: Complete Rule of 5
 		Planner(Planner&& other);
 
+		/**
+		 * Pure virtual function to define the interface to compute the plan
+		 * @return Computed plan for the arm
+		 */
 		virtual Plan plan() = 0;
 
 	protected:
+		/**
+		 * TODO: Finish Docs
+		 */
 		ArmConfiguration sample_config(const double &p_goal);
 
-		ArmConfiguration get_nearest_neighbor(const Tree &configs, const ArmConfiguration &new_config);
+		ArmConfiguration get_nearest_neighbor(
+			const Tree &configs,
+			const ArmConfiguration &new_config);
 
-		ArmConfiguration extend(const ArmConfiguration &nearest, const ArmConfiguration &sampled);
+		ArmConfiguration extend(
+			const ArmConfiguration &nearest,
+			const ArmConfiguration &sampled);
 
-		bool no_collisions(ArmConfiguration start_config, ArmConfiguration goal_config);
+		bool no_collisions(
+			ArmConfiguration start_config,
+			ArmConfiguration goal_config);
 
 		bool generate_RRT_tree(
 			Tree &T_start,

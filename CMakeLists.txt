@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
 
-project (SampleBasedPlanners)
+project(SampleBasedPlanners)
 
-add_subdirectory (src)
+add_subdirectory(src)

@@ -19,16 +19,19 @@ PRM::PRM(
 {
 }
 
-bool PRM::dijkstra(Tree &T, ArmConfiguration start, ArmConfiguration goal)
+bool PRM::dijkstra(
+    Tree &T,
+    const ArmConfiguration &start_config,
+    const ArmConfiguration &end_config)
 {
     std::vector<ArmConfiguration> plan;
 
     // Setup Data Structures for Search
     std::vector<size_t> open_set, closed_set;
-    open_set.emplace_back(start.id);
+    open_set.emplace_back(start_config.id);
 
     // Compute Cost for start cell
-    T[start.id].cost = 0.0;
+    T[start_config.id].cost = 0.0;
 
     // Begin main search loop
     size_t curr;
@@ -50,7 +53,7 @@ bool PRM::dijkstra(Tree &T, ArmConfiguration start, ArmConfiguration goal)
         curr = open_set[min_idx];
 
         // Check if we're at the goal and return final path
-        if (T[curr] == goal)
+        if (T[curr] == end_config)
             return true;
 
         // Deal with sets

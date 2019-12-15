@@ -27,6 +27,14 @@ struct PRMOptions
 class PRM : public Planner
 {
 	public:
+		/**
+		 * Constructor
+		 * @param opts General options for the planner
+		 * @param map Map to plan within
+		 * @param start_config Initial arm configuration
+ 		 * @param end_config Final arm configuration
+	     * @param arm_link_length Length of the arm to planning for
+		 */
 		PRM(
 			const PRMOptions &opts,
 			const Map &map,
@@ -34,10 +42,24 @@ class PRM : public Planner
 			const ArmConfiguration &goal_config,
 			const double arm_link_length);
 
+		/**
+		 * Compute the plan between the start and goal config
+		 * @return Computed plan for the arm
+		 */
 		Plan plan();
 
 	private:
-		bool dijkstra(Tree &T, ArmConfiguration start, ArmConfiguration goal);
+		/**
+		 * Perform a dijkstra graph search on a tree to find a path between a
+		 * start and end arm configuration
+ 		 * @param start_config Initial arm configuration
+ 		 * @param end_config Final arm configuration
+		 * @return Success bool
+		 */
+		bool dijkstra(
+			Tree &T,
+			const ArmConfiguration &start_config,
+			const ArmConfiguration &end_config);
 
 		const PRMOptions prm_opts_;
 };

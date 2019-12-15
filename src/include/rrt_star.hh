@@ -25,6 +25,14 @@ struct RRTStarOptions
 class RRTStar : public Planner
 {
 	public:
+		/**
+		 * Constructor
+		 * @param opts General options for the planner
+		 * @param map Map to plan within
+		 * @param start_config Initial arm configuration
+ 		 * @param end_config Final arm configuration
+	     * @param arm_link_length Length of the arm to planning for
+		 */
 		RRTStar(
 			const RRTStarOptions &opts,
 			const Map &map,
@@ -32,6 +40,10 @@ class RRTStar : public Planner
 			const ArmConfiguration &goal_config,
 			const double arm_link_length);
 
+		/**
+		 * Compute the plan between the start and goal config
+		 * @return Computed plan for the arm
+		 */
 		Plan plan();
 
 	private:
