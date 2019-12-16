@@ -71,10 +71,11 @@ struct BresenhamParams
 		x_index = x1;
 		y_index = y1;
 	}
-
-
 };
 
+/**
+ * TODO: Docs
+ */
 void cont_xy_to_cell(const double x, const double y, short unsigned &pX, short unsigned &pY, const size_t x_size, const size_t y_size);
 
 void get_current_point(const BresenhamParams &params, int &x, int &y);

@@ -36,7 +36,7 @@ Plan RRTStar::plan()
         if (generate_RRT_tree(T, goal_config_, x_new))
         {
             // Get neighbors of T around x_new
-            auto X_near = get_neighbors(T, x_new, rrtstar_opts_.rewire_radius);
+            const auto X_near = get_neighbors(T, x_new, rrtstar_opts_.rewire_radius);
 
             // Compute cost of x_new to origin using currently wired path
             std::vector<ArmConfiguration> path;

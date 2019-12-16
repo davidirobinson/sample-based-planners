@@ -106,7 +106,7 @@ Plan PRM::plan()
     while (true)
     {
         // Uniform random sampling
-        ArmConfiguration alpha = sample_config(0);
+        ArmConfiguration alpha = sample_config(0, goal_config_);
 
         if (is_valid_arm_config(alpha, map_, arm_link_length_))
         {

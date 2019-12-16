@@ -107,34 +107,79 @@ class Planner
 
 	protected:
 		/**
-		 * TODO: Finish Docs
+		 * Sample a uniformly random arm configuarion in the map
+		 * @param p_goal probability of sampling the goal
+		 * @param goal_config Goal config to sample with some probability
+		 * @return Randomly sampled arm configuration
 		 */
-		ArmConfiguration sample_config(const double &p_goal);
+		ArmConfiguration sample_config(
+			const double &p_goal,
+			const ArmConfiguration &goal_config);
 
+		/**
+		 * Find closest arm configuration in tree to a given configuration
+		 * @param configs Arm configurations tree to search through
+		 * @param new_config Arm configuration to find nearest neighbor for
+		 * @return Nearest arm configuration
+		 */
 		ArmConfiguration get_nearest_neighbor(
 			const Tree &configs,
 			const ArmConfiguration &new_config);
 
+		/**
+		 * Get arm configuration within a fixed angle step size towards a sampled config
+		 * @param nearest Arm configuration to step from
+		 * @param sampled Arm configuration to step towards
+		 * @return Extended arm configuration
+		 */
 		ArmConfiguration extend(
 			const ArmConfiguration &nearest,
 			const ArmConfiguration &sampled);
 
+		/**
+		 * Interpolates between and start and end arm config to determine if there are
+		 * any collisions
+		 * @param start_config Config to begin collision search at
+		 * @param goal_config Config to end collision search at
+		 * @return Success bool
+		 */
 		bool no_collisions(
-			ArmConfiguration start_config,
-			ArmConfiguration goal_config);
+			const ArmConfiguration &start_config,
+			const ArmConfiguration &goal_config);
 
+		/**
+		 * Function specific to RRT planners which consisdates function calls to get a new sample,
+		 * find it's nearest neighbor, extent towards that neighbor, and then check collisions for
+		 * the extended configuration.
+		 * @param tree_start Tree to sample neighbor from an append extended config to
+		 * @param goal_config Goal config to sample with some probability
+		 * @param extended_config Extended configuration to return by reference
+		 * @return Success bool
+		 */
 		bool generate_RRT_tree(
-			Tree &T_start,
+			Tree &tree_start,
 			const ArmConfiguration &goal_config,
 			ArmConfiguration &extended_config);
 
+		/**
+		 * Search through configuration tree to find sequence of arm configurations to return
+		 * @param plan Vector of arm configuration to append to
+		 * @param tree Arm configuration tree
+		 * @param parent Parent node to begin tree search with
+		 */
 		void generate_path(
 			std::vector<ArmConfiguration> &plan,
-			Tree &T,
-			ArmConfiguration parent);
+			const Tree &tree,
+			const ArmConfiguration &parent);
 
+		/**
+		 * Search through configuration tree to find neighbors of an arm configuration
+		 * @param tree Arm configuration tree
+		 * @param config Arm configuration to find neighbors of
+		 * @param radius Distance radius to collect neighbors within
+		 */
 		std::vector<size_t> get_neighbors(
-			const Tree &T,
+			const Tree &tree,
 			const ArmConfiguration &config,
 			const double &radius);
 

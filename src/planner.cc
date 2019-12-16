@@ -63,18 +63,20 @@ Planner::Planner(Planner&& other) :
 {
 }
 
-ArmConfiguration Planner::sample_config(const double &p_goal)
+ArmConfiguration Planner::sample_config(
+    const double &p_goal,
+    const ArmConfiguration &goal_config)
 {
     std::uniform_real_distribution<double> probability(0, 1);
     std::uniform_real_distribution<double> angle(0, 2 * M_PI);
 
     if (probability(random_) < p_goal)
-        return goal_config_;
+        return goal_config;
 
     ArmConfiguration random_config;
-    random_config.angles.resize(goal_config_.angles.size());
+    random_config.angles.resize(goal_config.angles.size());
 
-    for (size_t i = 0; i < goal_config_.angles.size(); i++)
+    for (size_t i = 0; i < goal_config.angles.size(); i++)
         random_config.angles[i] = angle(random_);
 
     return random_config;
@@ -118,7 +120,7 @@ ArmConfiguration Planner::extend(const ArmConfiguration &nearest, const ArmConfi
     return interp;
 }
 
-bool Planner::no_collisions(ArmConfiguration start_config, ArmConfiguration goal_config)
+bool Planner::no_collisions(const ArmConfiguration &start_config, const ArmConfiguration &goal_config)
 {
     for (double i = 0; i <= opts_.interp_samples; i += 1.0)
     {
@@ -137,20 +139,20 @@ bool Planner::no_collisions(ArmConfiguration start_config, ArmConfiguration goal
 }
 
 bool Planner::generate_RRT_tree(
-    Tree &T_start,
+    Tree &tree_start,
     const ArmConfiguration &goal_config,
     ArmConfiguration &extended_config)
 {
-    ArmConfiguration new_config = sample_config(opts_.p_goal_sample);
-    ArmConfiguration nearest_config = get_nearest_neighbor(T_start, new_config);
+    ArmConfiguration new_config = sample_config(opts_.p_goal_sample, goal_config);
+    ArmConfiguration nearest_config = get_nearest_neighbor(tree_start, new_config);
     extended_config = extend(nearest_config, new_config);
 
     if (no_collisions(nearest_config, extended_config))
     {
         // Attach parent and add to tree
-        extended_config.id = T_start.size();
+        extended_config.id = tree_start.size();
         extended_config.parent_id = nearest_config.id;
-        T_start[extended_config.id] = extended_config;
+        tree_start[extended_config.id] = extended_config;
 
         return true;
     }
@@ -158,32 +160,34 @@ bool Planner::generate_RRT_tree(
     return false;
 }
 
-void Planner::generate_path(std::vector<ArmConfiguration> &plan, Tree &T, ArmConfiguration parent)
+void Planner::generate_path(
+    std::vector<ArmConfiguration> &plan,
+    const Tree &tree,
+    const ArmConfiguration &parent)
 {
-    const auto start_time = std::chrono::steady_clock::now();
-    while ((std::chrono::steady_clock::now() - start_time).count() / 1e9 < opts_.timeout_s)
+    ArmConfiguration parent_ = parent;
+    plan.emplace_back(parent_);
+
+    while (parent_.parent_id != -1)
     {
-        plan.emplace_back(parent);
-        if (parent.parent_id != -1)
-            parent = T[parent.parent_id];
-        else
-            break;
+        parent_ = tree.at(parent_.parent_id);
+        plan.emplace_back(parent_);
     }
 }
 
 std::vector<size_t> Planner::get_neighbors(
-    const Tree &T,
+    const Tree &tree,
     const ArmConfiguration &config,
     const double &radius)
 {
     std::vector<size_t> neighbors;
 
-    for (const auto &t : T)
+    for (const auto &t : tree)
     {
         const auto dist = config_dist(t.second, config);
-        if (dist < radius &&
-            config.parent_id != t.second.id &&
-            config.id != t.second.id)
+        if (dist < radius
+            && config.parent_id != t.second.id
+            && config.id != t.second.id)
         {
             neighbors.emplace_back(t.second.id);
         }
