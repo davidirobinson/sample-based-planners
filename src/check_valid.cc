@@ -8,25 +8,34 @@
 #include <check_valid.hh>
 
 
-void cont_xy_to_cell(const double x, const double y, short unsigned &pX, short unsigned &pY, const size_t x_size, const size_t y_size)
+void cont_xy_to_cell(
+	const double x,
+	const double y,
+	short unsigned &px,
+	short unsigned &py,
+	const size_t x_size,
+	const size_t y_size)
 {
 	constexpr double cellsize = 1.0;
 
 	// Take the nearest cell
-	pX = static_cast<int>(x / static_cast<double>(cellsize));
+	px = static_cast<int>(x / static_cast<double>(cellsize));
 	if (x < 0)
-		pX = 0;
-	if (pX >= x_size)
-		pX = x_size - 1;
+		px = 0;
+	if (px >= x_size)
+		px = x_size - 1;
 
-	pY = static_cast<int>(y / static_cast<double>(cellsize));
+	py = static_cast<int>(y / static_cast<double>(cellsize));
 	if (y < 0)
-		pY = 0;
-	if (pY >= y_size)
-		pY = y_size - 1;
+		py = 0;
+	if (py >= y_size)
+		py = y_size - 1;
 }
 
-void get_current_point(const BresenhamParams &params, int &x, int &y)
+void get_current_point(
+	const BresenhamParams &params,
+	int &x,
+	int &y)
 {
 	if (params.using_y_index)
 	{
@@ -63,7 +72,12 @@ bool get_next_point(BresenhamParams &params)
 	return true;
 }
 
-bool is_valid_line_segment(const double x0, const double y0, const double x1, const double y1, const Map &map)
+bool is_valid_line_segment(
+	const double x0,
+	const double y0,
+	const double x1,
+	const double y1,
+	const Map &map)
 {
 	int nx, ny;
     short unsigned nx0, ny0, nx1, ny1;
@@ -93,7 +107,10 @@ bool is_valid_line_segment(const double x0, const double y0, const double x1, co
 	return true;
 }
 
-bool is_valid_arm_config(const ArmConfiguration &config, const Map &map, const double arm_link_length)
+bool is_valid_arm_config(
+	const ArmConfiguration &config,
+	const Map &map,
+	const double arm_link_length)
 {
  	// Iterate through all the links starting with the base
     double x0, y0, x1(0), y1(0);

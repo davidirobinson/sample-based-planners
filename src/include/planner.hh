@@ -26,7 +26,7 @@
 
 struct PlannerOptions
 {
-	double timeout_s = 30;
+	double timeout_s = 30.0;
 	unsigned interp_samples = 50;
 	double angle_step_size_rad = 0.5;
 	double p_goal_sample = 0.05;
@@ -96,7 +96,10 @@ class Planner
 			const ArmConfiguration &goal_config,
 			const double arm_link_length);
 
-		// TODO: Complete Rule of 5
+		/**
+		 * Move constructor
+		 * @param other Reference (rvalue) to construct class with
+		 */
 		Planner(Planner&& other);
 
 		/**

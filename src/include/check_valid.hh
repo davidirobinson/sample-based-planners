@@ -27,7 +27,11 @@ struct BresenhamParams
 	int x_index, y_index;
 	int flipped;
 
-	BresenhamParams(int p1x, int p1y, int p2x, int p2y)
+	BresenhamParams(
+		const int p1x,
+		const int p1y,
+		const int p2x,
+		const int p2y)
 	{
 		using_y_index = 0;
 
@@ -74,14 +78,65 @@ struct BresenhamParams
 };
 
 /**
- * TODO: Docs
+ * Discretize a continuous coordinate into a cell index
+ * @param x Continuous X coordinate
+ * @param y Continuous Y coordinate
+ * @param px Discretized X coordinate to return by reference
+ * @param py Discretized Y coordinate to return by reference
+ * @param x_size Width of the map
+ * @param y_size Height of the map
  */
-void cont_xy_to_cell(const double x, const double y, short unsigned &pX, short unsigned &pY, const size_t x_size, const size_t y_size);
+void cont_xy_to_cell(
+	const double x,
+	const double y,
+	short unsigned &px,
+	short unsigned &py,
+	const size_t x_size,
+	const size_t y_size);
 
-void get_current_point(const BresenhamParams &params, int &x, int &y);
+/**
+ * Returns current x, y coordinate in line traversal
+ * @param params Bresenham params data structure to manage state of line traversal
+ * @param x Returns current X coordinate by reference
+ * @param y Returns current X coordinate by reference
+ */
+void get_current_point(
+	const BresenhamParams &params,
+	int &x,
+	int &y);
 
+/**
+ * Updates Bresenham params state to next x, y coordinate in line traversal
+ * @param params Bresenham params data structure to manage state of line traversal
+ * @return False if end of line traversal is reached
+ */
 bool get_next_point(BresenhamParams &params);
 
-bool is_valid_line_segment(const double x0, const double y0, const double x1, const double y1, const Map &map);
+/**
+ * Determines whether a line segment is in collision with a map
+ * @param x0 X coordinate for beginning of line segment
+ * @param y0 Y coordinate for beginning of line segment
+ * @param x1 X coordinate for end of line segment
+ * @param y1 Y coordinate for end of line segment
+ * @param map Map to check for collisions within
+ * @return bool True if line segment is not in collision with map
+ */
+bool is_valid_line_segment(
+	const double x0,
+	const double y0,
+	const double x1,
+	const double y1,
+	const Map &map);
 
-bool is_valid_arm_config(const ArmConfiguration &config, const Map &map, const double arm_link_length);
+/**
+ * Determines whether an arm configuration is in collision with a map by checking
+ * each segment of the arm
+ * @param config Arm configuration to check for collisions with
+ * @param map Map to check for collisions within
+ * @param arm_link_length Length of each arm segment
+ * @return bool True if arm is not in collision with map
+ */
+bool is_valid_arm_config(
+	const ArmConfiguration &config,
+	const Map &map,
+	const double arm_link_length);

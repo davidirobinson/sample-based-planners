@@ -66,6 +66,7 @@ inline std::ostream &operator<<(std::ostream &stream, const ArmConfiguration &ar
 {
     for (const auto &angle : arm_config.angles)
         stream << angle * 180 / M_PI << " ";
+
     return stream;
 }
 
@@ -76,8 +77,8 @@ inline bool operator==(const ArmConfiguration &a, const ArmConfiguration &b)
 
 	for (size_t i = 0; i < a.angles.size(); i++)
 	{
-		double dist = fabs(a.angles[i] - b.angles[i]);
-		if (dist > 0.001) return false;
+		if (fabs(a.angles[i] - b.angles[i]) > 0.001)
+			return false;
 	}
 
 	return true;

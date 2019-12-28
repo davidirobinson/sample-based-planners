@@ -34,9 +34,9 @@ void print_usage(char **argv)
 struct GeneralOptions
 {
     PlannerType planner_type = PlannerType::RRTConnect;
-	ArmConfiguration start_config;
-	ArmConfiguration goal_config;
-	double arm_link_length;
+	ArmConfiguration start;
+	ArmConfiguration goal;
+	double arm_link_length = 10.0;
 	double display_scale = 5.0;
 
 	GeneralOptions()
@@ -60,10 +60,10 @@ struct GeneralOptions
             throw std::runtime_error(std::string("Unknown planner type: " + planner_type_str));
 
 		for (const auto &angle_json : json["general"]["arm_start_degrees"])
-			start_config.angles.emplace_back(angle_json.asDouble() / 180 * M_PI);
+			start.angles.emplace_back(angle_json.asDouble() / 180 * M_PI);
 
 		for (const auto &angle_json : json["general"]["arm_end_degrees"])
-			goal_config.angles.emplace_back(angle_json.asDouble() / 180 * M_PI);
+			goal.angles.emplace_back(angle_json.asDouble() / 180 * M_PI);
 
 		arm_link_length = json["general"]["arm_link_length"].asDouble();
 		display_scale = json["general"]["image_display_scale"].asDouble();
@@ -112,33 +112,38 @@ Map load_map(const std::string &map_path)
         }
     }
 
-    return Map{ image_uchar, static_cast<size_t>(image_uchar.cols), static_cast<size_t>(image_uchar.rows), data };
+    return Map{ image_uchar,
+                static_cast<size_t>(image_uchar.cols),
+                static_cast<size_t>(image_uchar.rows),
+                data };
 }
 
 cv::Mat draw_configs(
-    cv::Mat map_image,
+    cv::Mat map,
     const std::vector<ArmConfiguration> &configs,
     const double arm_link_length,
     const double scale)
 {
-    cv::resize(map_image, map_image, cv::Size(), scale, scale, cv::INTER_NEAREST);
-    cv::cvtColor(map_image, map_image, CV_GRAY2RGB);
+    const auto red = cv::Scalar(0, 0, 255);
+    cv::resize(map, map, cv::Size(), scale, scale, cv::INTER_NEAREST);
+    cv::cvtColor(map, map, CV_GRAY2RGB);
 
     for (const auto &config : configs)
     {
         cv::Point2d current(0.0, 0.0);
-        cv::circle(map_image, swap_coords(map_image, current), scale * 0.5, cv::Scalar(0, 0, 255), CV_FILLED);
+        cv::circle(map, swap_coords(map, current), scale * 0.5, red, CV_FILLED);
 
         for (size_t i = 0; i < config.angles.size(); ++i)
         {
             cv::Point2d next(current.x + arm_link_length * scale * cos(config.angles.at(i)),
                              current.y + arm_link_length * scale * sin(config.angles.at(i)));
-            cv::line(map_image, swap_coords(map_image, current), swap_coords(map_image, next), cv::Scalar(0, 0, 255), scale * 0.3);
-            cv::circle(map_image, swap_coords(map_image, next), scale * 0.6, cv::Scalar(0, 0, 255), CV_FILLED);
+            cv::line(map, swap_coords(map, current), swap_coords(map, next), red, scale * 0.3);
+            cv::circle(map, swap_coords(map, next), scale * 0.6, red, CV_FILLED);
             current = next;
         }
     }
-    return map_image;
+
+    return map;
 }
 
 int main(int argc, char *argv[])
@@ -179,14 +184,14 @@ int main(int argc, char *argv[])
     const auto opts = GeneralOptions(config_json);
 
     std::cout << "Loaded " << map.size_x << "x" << map.size_y << " map." << std::endl;
-    std::cout << "Start angles (degrees): " << opts.start_config << std::endl;
-    std::cout << "End angles (degrees): " << opts.goal_config << std::endl;
+    std::cout << "Start angles (degrees): " << opts.start << std::endl;
+    std::cout << "End angles (degrees): " << opts.goal << std::endl;
 
     if (visualize)
     {
         std::cout << std::endl << "Press any key to begin planning..." << std::endl;
 
-        const auto configs = std::vector<ArmConfiguration>{ opts.start_config, opts.goal_config };
+        const auto configs = std::vector<ArmConfiguration>{ opts.start, opts.goal };
         cv::imshow("Map", draw_configs(map.image, configs, opts.arm_link_length, opts.display_scale));
         cv::waitKey(0);
         cv::destroyAllWindows();
@@ -198,19 +203,19 @@ int main(int argc, char *argv[])
     {
         case PlannerType::RRT:
             planner = std::make_unique<RRT>(RRT(
-                RRTOptions(config_json), map, opts.start_config, opts.goal_config, opts.arm_link_length));
+                RRTOptions(config_json), map, opts.start, opts.goal, opts.arm_link_length));
             break;
         case PlannerType::RRTConnect:
             planner = std::make_unique<RRTConnect>(RRTConnect(
-                RRTConnectOptions(config_json), map, opts.start_config, opts.goal_config, opts.arm_link_length));
+                RRTConnectOptions(config_json), map, opts.start, opts.goal, opts.arm_link_length));
             break;
         case PlannerType::RRTStar:
             planner = std::make_unique<RRTStar>(RRTStar(
-                RRTStarOptions(config_json), map, opts.start_config, opts.goal_config, opts.arm_link_length));
+                RRTStarOptions(config_json), map, opts.start, opts.goal, opts.arm_link_length));
             break;
         case PlannerType::PRM:
             planner = std::make_unique<PRM>(PRM(
-                PRMOptions(config_json), map, opts.start_config, opts.goal_config, opts.arm_link_length));
+                PRMOptions(config_json), map, opts.start, opts.goal, opts.arm_link_length));
             break;
         default:
             throw std::runtime_error("Unsupported planner type");
@@ -221,11 +226,14 @@ int main(int argc, char *argv[])
 
     if (!plan.valid)
     {
-        std::cout << std::endl << "Planner failed / timed out in " << plan.duration.count() << " seconds" << std::endl;
+        std::cout << std::endl << "Planner failed / timed out in "
+                  << plan.duration.count() << " seconds" << std::endl;
         std::exit(EXIT_FAILURE);
     }
 
-    std::cout << std::endl << "Planner succeded in " << plan.duration.count() << " seconds" << std::endl;
+    std::cout << std::endl << "Planner succeded in "
+              << plan.duration.count() << " seconds" << std::endl;
+
     for (const auto &config : plan.configs)
     {
         std::cout << config << std::endl;
