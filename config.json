@@ -17,7 +17,7 @@
         "type": "rrtconnect",
         "timeout_s": 60.0,
         "interp_samples": 50,
-        "angle_step_size_deg": 30.0,
+        "angle_step_size_degrees": 30.0,
         "p_goal_sample": 0.05,
         "rrtstar":
         {

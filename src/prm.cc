@@ -30,13 +30,10 @@ bool PRM::dijkstra(
     std::vector<size_t> open_set, closed_set;
     open_set.emplace_back(start_config.id);
 
-    // Compute Cost for start cell
-    T[start_config.id].cost = 0.0;
-
     // Begin main search loop
     size_t curr;
     const auto start_time = std::chrono::steady_clock::now();
-    while(!open_set.empty() && (std::chrono::steady_clock::now() - start_time).count() / 1e9 < opts_.timeout_s)
+    while (!open_set.empty() && (std::chrono::steady_clock::now() - start_time).count() / 1e9 < opts_.timeout_s)
     {
         // Get ArmConfiguration with lowest f value
         float min_f = 1e99;
@@ -64,7 +61,7 @@ bool PRM::dijkstra(
         for (const auto &edge : T[curr].edges)
         {
             // See if the neighbor is in the closed set
-            if(std::find(closed_set.begin(), closed_set.end(), edge) != closed_set.end())
+            if (std::find(closed_set.begin(), closed_set.end(), edge) != closed_set.end())
             {
                 continue;
             }
@@ -102,11 +99,12 @@ Plan PRM::plan()
     Tree PRM;
     ArmConfiguration PRM_start_config, PRM_goal_config;
     bool valid_start_goal_connections = false;
-    int PRM_samples(0);
+    size_t PRM_samples(0);
+
     while (true)
     {
         // Uniform random sampling
-        ArmConfiguration alpha = sample_config(0, goal_config_);
+        auto alpha = sample_config(0, goal_config_);
 
         if (is_valid_arm_config(alpha, map_, arm_link_length_))
         {

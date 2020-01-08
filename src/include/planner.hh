@@ -20,7 +20,6 @@
 #include <types.hh>
 #include <check_valid.hh>
 
-#include <opencv2/opencv.hpp>
 #include <json/json.h>
 
 
@@ -39,7 +38,7 @@ struct PlannerOptions
     {
 		timeout_s = json["planner"]["timeout_s"].asDouble();
 		interp_samples = json["planner"]["interp_samples"].asUInt();
-		angle_step_size_rad = json["planner"]["angle_step_size_deg"].asDouble() / 180 * M_PI;
+		angle_step_size_rad = json["planner"]["angle_step_size_degrees"].asDouble() / 180 * M_PI;
 		p_goal_sample = json["planner"]["p_goal_sample"].asDouble();
     }
 };
@@ -52,6 +51,11 @@ struct PlannerOptions
  */
 double config_dist(const ArmConfiguration &a, const ArmConfiguration &b);
 
+/**
+ * Data structure containing information describing an arm plan, i.e. a sequence of
+ * steps that the arm should take to move from the start to end config without colliding
+ * with any obstacles in the map
+ */
 struct Plan
 {
 	bool valid;
@@ -151,7 +155,7 @@ class Planner
 			const ArmConfiguration &goal_config);
 
 		/**
-		 * Function specific to RRT planners which consisdates function calls to get a new sample,
+		 * Function specific to RRT planners which consolidates function calls to get a new sample,
 		 * find it's nearest neighbor, extent towards that neighbor, and then check collisions for
 		 * the extended configuration.
 		 * @param tree_start Tree to sample neighbor from an append extended config to

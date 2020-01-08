@@ -9,13 +9,18 @@
 
 #include <opencv2/opencv.hpp>
 
-
+/**
+ * Enum to represent possible map states
+ */
 enum class MapState
 {
 	Occupied,
 	Free
 };
 
+/**
+ * Data structure to hold information about the map to plan within
+ */
 struct Map
 {
 	cv::Mat image;
@@ -24,6 +29,9 @@ struct Map
 	std::unordered_map<size_t, std::unordered_map<size_t, MapState>> data;
 };
 
+/**
+ * Enum to represent possible planners to use
+ */
 enum class PlannerType
 {
     RRT,
@@ -32,31 +40,30 @@ enum class PlannerType
     PRM
 };
 
-enum class PlannerUnits
-{
-	Radians,
-	Degrees
-};
-
+/**
+ * Data structure containing information to describe an arm configuration
+ */
 struct ArmConfiguration
 {
 	size_t id;
 	size_t parent_id;
 	std::vector<double> angles;
 	double cost;
-	std::vector<int> edges;
+	std::vector<size_t> edges;
 
-	ArmConfiguration()
+	ArmConfiguration() :
+		id(0),
+		parent_id(-1),
+		cost(0.0)
 	{
-		id = 0;
-		parent_id = -1;
 	}
 
-	ArmConfiguration(std::vector<double> _angles) :
-		angles(_angles)
+	ArmConfiguration(const std::vector<double> &angles) :
+		angles(angles),
+		id(0),
+		parent_id(-1),
+		cost(0.0)
 	{
-		id = 0;
-		parent_id = -1;
 	}
 };
 

@@ -12,9 +12,10 @@
 
 #include <types.hh>
 
-#include <opencv2/opencv.hpp>
 
-
+/**
+ * Data structure containing the internal state parameters for the Bresenham algorithm
+ */
 struct BresenhamParams
 {
 	int x1, y1;
